@@ -3,13 +3,17 @@ import { getMasterPool } from '@/lib/db';
 import { ApiResponse } from '@/types';
 import bcrypt from 'bcryptjs';
 
+interface RouteParams {
+  params: Promise<{ id: string }>;
+}
+
 // GET - Fetch a specific subscriber by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   const pool = getMasterPool();
-  const subscriberId = params.id;
+  const { id: subscriberId } = await params;
 
   try {
     const result = await pool.query(
@@ -71,10 +75,10 @@ export async function GET(
 // PUT - Update a subscriber
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   const pool = getMasterPool();
-  const subscriberId = params.id;
+  const { id: subscriberId } = await params;
 
   try {
     const body = await request.json();
@@ -156,10 +160,10 @@ export async function PUT(
 // DELETE - Delete a subscriber and its tenant database
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   const pool = getMasterPool();
-  const subscriberId = params.id;
+  const { id: subscriberId } = await params;
 
   try {
     // Get tenant info before deletion

@@ -10,6 +10,7 @@ import {
   ExternalLink,
   Database,
   Calendar,
+  Building2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Modal from '@/components/Modal';
@@ -206,7 +207,7 @@ export default function SubscribersPage() {
                   <th>Database</th>
                   <th>Status</th>
                   <th>Created</th>
-                  <th style={{ width: '150px' }}>Actions</th>
+                  <th style={{ width: '180px' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -261,6 +262,15 @@ export default function SubscribersPage() {
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <Link href={`/subscribers/${subscriber.subscriberId}/entities`}>
+                          <button
+                            className="btn btn-primary"
+                            style={{ padding: '0.375rem 0.5rem' }}
+                            title="View Entities"
+                          >
+                            <Building2 size={14} />
+                          </button>
+                        </Link>
                         <Link href={`/schedules?subscriberId=${subscriber.subscriberId}`}>
                           <button
                             className="btn btn-secondary"

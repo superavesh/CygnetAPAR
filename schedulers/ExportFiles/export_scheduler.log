@@ -1,0 +1,841 @@
+2026-01-18 02:24:17,303 - __main__ - INFO - Export Scheduler Service initialized
+2026-01-18 02:24:17,304 - __main__ - INFO - Master DB: localhost:5432/CygnetAPARMaster
+2026-01-18 02:24:17,305 - __main__ - INFO - Output directory: D:\Avesh\APARChatBot\NFSShared
+2026-01-18 02:24:17,305 - __main__ - INFO - Starting Export Scheduler Service (check interval: 60s)
+2026-01-18 02:24:17,305 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:24:17,400 - db_connection - ERROR - Error connecting to master database: column st.start_datetime does not exist
+LINE 11:             st.start_datetime,
+                     ^
+
+2026-01-18 02:24:17,400 - __main__ - ERROR - Error in scheduler run: column st.start_datetime does not exist
+LINE 11:             st.start_datetime,
+                     ^
+
+2026-01-18 02:25:17,404 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:25:17,503 - db_connection - ERROR - Error connecting to master database: column st.start_datetime does not exist
+LINE 11:             st.start_datetime,
+                     ^
+
+2026-01-18 02:25:17,503 - __main__ - ERROR - Error in scheduler run: column st.start_datetime does not exist
+LINE 11:             st.start_datetime,
+                     ^
+
+2026-01-18 02:26:17,503 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:26:17,634 - __main__ - INFO - Found 0 active export tasks
+2026-01-18 02:26:39,596 - __main__ - INFO - Received signal 2, shutting down...
+2026-01-18 02:26:39,597 - __main__ - INFO - Stopping Export Scheduler Service...
+2026-01-18 02:26:45,763 - __main__ - INFO - Export Scheduler Service initialized
+2026-01-18 02:26:45,764 - __main__ - INFO - Master DB: localhost:5432/CygnetAPARMaster
+2026-01-18 02:26:45,764 - __main__ - INFO - Output directory: D:\Avesh\APARChatBot\NFSShared
+2026-01-18 02:26:45,764 - __main__ - INFO - Starting Export Scheduler Service (check interval: 60s)
+2026-01-18 02:26:45,765 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:26:45,869 - __main__ - INFO - Found 0 active export tasks
+2026-01-18 02:27:45,869 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:27:46,046 - __main__ - INFO - Found 0 active export tasks
+2026-01-18 02:28:46,046 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:28:46,256 - __main__ - INFO - Found 0 active export tasks
+2026-01-18 02:29:46,257 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:29:46,459 - __main__ - INFO - Found 0 active export tasks
+2026-01-18 02:30:46,459 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:30:46,711 - __main__ - INFO - Found 0 active export tasks
+2026-01-18 02:31:46,711 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:31:46,938 - __main__ - INFO - Found 0 active export tasks
+2026-01-18 02:32:46,939 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:32:47,061 - __main__ - INFO - Found 0 active export tasks
+2026-01-18 02:33:47,062 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:33:47,245 - __main__ - INFO - Found 0 active export tasks
+2026-01-18 02:34:47,246 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:34:47,400 - __main__ - INFO - Found 0 active export tasks
+2026-01-18 02:35:47,400 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:35:47,509 - __main__ - INFO - Found 0 active export tasks
+2026-01-18 02:36:47,509 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:36:47,681 - __main__ - INFO - Found 0 active export tasks
+2026-01-18 02:37:47,682 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:37:47,877 - __main__ - INFO - Found 0 active export tasks
+2026-01-18 02:38:47,878 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:38:48,027 - __main__ - INFO - Found 0 active export tasks
+2026-01-18 02:39:48,028 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:39:48,136 - __main__ - INFO - Found 0 active export tasks
+2026-01-18 02:40:48,136 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:40:48,295 - __main__ - INFO - Found 0 active export tasks
+2026-01-18 02:41:48,295 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:41:48,496 - __main__ - INFO - Found 0 active export tasks
+2026-01-18 02:42:48,497 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:42:48,626 - __main__ - INFO - Found 1 active export tasks
+2026-01-18 02:42:48,626 - __main__ - INFO - Running task: Fetch Sales Data (ID: 1)
+2026-01-18 02:42:48,627 - __main__ - INFO - Processing task 1 for subscriber CygnetOne
+2026-01-18 02:42:48,743 - __main__ - INFO - Initial sync: fetching from 2025-02-06 12:00:00 to 2026-01-18 02:42:48.743524
+2026-01-18 02:42:48,859 - __main__ - INFO - Found 19 entities for subscriber 663
+2026-01-18 02:42:48,860 - __main__ - INFO - Fetching data for GSTIN: 24AAHFC3011G1Z4
+2026-01-18 02:42:48,860 - api_client - INFO - Fetching sale export: GSTIN=24AAHFC3011G1Z4, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:42:49,904 - api_client - INFO - API Response: 2 records fetched
+2026-01-18 02:42:49,906 - api_client - INFO - Fetched 2/2 records for GSTIN 24AAHFC3011G1Z4
+2026-01-18 02:42:49,910 - api_client - INFO - Saved 2 records to D:\Avesh\APARChatBot\NFSShared\CygnetOne\2026\01\18\24AAHFC3011G1Z4_20250206_120000_to_20260118_024248_20260118_024249.json
+2026-01-18 02:42:49,911 - __main__ - INFO - Saved 2 records for GSTIN 24AAHFC3011G1Z4
+2026-01-18 02:42:49,911 - __main__ - INFO - Fetching data for GSTIN: 27AABCC5127A1Z9
+2026-01-18 02:42:49,911 - api_client - INFO - Fetching sale export: GSTIN=27AABCC5127A1Z9, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:42:50,591 - api_client - INFO - API Response: 1 records fetched
+2026-01-18 02:42:50,593 - api_client - INFO - Fetched 1/1 records for GSTIN 27AABCC5127A1Z9
+2026-01-18 02:42:50,595 - api_client - INFO - Saved 1 records to D:\Avesh\APARChatBot\NFSShared\CygnetOne\2026\01\18\27AABCC5127A1Z9_20250206_120000_to_20260118_024248_20260118_024250.json
+2026-01-18 02:42:50,595 - __main__ - INFO - Saved 1 records for GSTIN 27AABCC5127A1Z9
+2026-01-18 02:42:50,596 - __main__ - INFO - Fetching data for GSTIN: 24AADCC1450E1ZB
+2026-01-18 02:42:50,596 - api_client - INFO - Fetching sale export: GSTIN=24AADCC1450E1ZB, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:42:51,912 - api_client - INFO - API Response: 222 records fetched
+2026-01-18 02:42:51,914 - api_client - INFO - Fetched 222/222 records for GSTIN 24AADCC1450E1ZB
+2026-01-18 02:42:51,969 - api_client - INFO - Saved 222 records to D:\Avesh\APARChatBot\NFSShared\CygnetOne\2026\01\18\24AADCC1450E1ZB_20250206_120000_to_20260118_024248_20260118_024251.json
+2026-01-18 02:42:51,970 - __main__ - INFO - Saved 222 records for GSTIN 24AADCC1450E1ZB
+2026-01-18 02:42:51,971 - __main__ - INFO - Fetching data for GSTIN: 24AAJCM8902B1ZQ
+2026-01-18 02:42:51,971 - api_client - INFO - Fetching sale export: GSTIN=24AAJCM8902B1ZQ, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:42:52,591 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:42:52,592 - __main__ - ERROR - Error fetching data for GSTIN 24AAJCM8902B1ZQ: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:42:52,596 - __main__ - INFO - Fetching data for GSTIN: 24AAIFE2287R2ZT
+2026-01-18 02:42:52,596 - api_client - INFO - Fetching sale export: GSTIN=24AAIFE2287R2ZT, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:42:53,245 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:42:53,246 - __main__ - ERROR - Error fetching data for GSTIN 24AAIFE2287R2ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:42:53,249 - __main__ - INFO - Fetching data for GSTIN: 24AAKCS5705K1Z5
+2026-01-18 02:42:53,249 - api_client - INFO - Fetching sale export: GSTIN=24AAKCS5705K1Z5, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:42:53,899 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:42:53,900 - __main__ - ERROR - Error fetching data for GSTIN 24AAKCS5705K1Z5: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:42:53,905 - __main__ - INFO - Fetching data for GSTIN: 27AABCC5127A2Z8
+2026-01-18 02:42:53,906 - api_client - INFO - Fetching sale export: GSTIN=27AABCC5127A2Z8, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:42:54,579 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:42:54,579 - __main__ - ERROR - Error fetching data for GSTIN 27AABCC5127A2Z8: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:42:54,581 - __main__ - INFO - Fetching data for GSTIN: 24AABCC5127A1ZF
+2026-01-18 02:42:54,581 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A1ZF, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:42:56,692 - api_client - INFO - API Response: 1000 records fetched
+2026-01-18 02:42:56,694 - api_client - INFO - Fetched 1000/1267 records for GSTIN 24AABCC5127A1ZF
+2026-01-18 02:42:56,694 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A1ZF, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:42:57,957 - api_client - INFO - API Response: 267 records fetched
+2026-01-18 02:42:57,959 - api_client - INFO - Fetched 1267/0 records for GSTIN 24AABCC5127A1ZF
+2026-01-18 02:42:58,252 - api_client - INFO - Saved 1267 records to D:\Avesh\APARChatBot\NFSShared\CygnetOne\2026\01\18\24AABCC5127A1ZF_20250206_120000_to_20260118_024248_20260118_024257.json
+2026-01-18 02:42:58,253 - __main__ - INFO - Saved 1267 records for GSTIN 24AABCC5127A1ZF
+2026-01-18 02:42:58,253 - __main__ - INFO - Fetching data for GSTIN: 24AAGCC7953B1ZU
+2026-01-18 02:42:58,253 - api_client - INFO - Fetching sale export: GSTIN=24AAGCC7953B1ZU, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:42:58,873 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:42:58,875 - __main__ - ERROR - Error fetching data for GSTIN 24AAGCC7953B1ZU: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:42:58,880 - __main__ - INFO - Fetching data for GSTIN: 24AAJFJ1018J1ZL
+2026-01-18 02:42:58,881 - api_client - INFO - Fetching sale export: GSTIN=24AAJFJ1018J1ZL, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:43:00,275 - api_client - INFO - API Response: 274 records fetched
+2026-01-18 02:43:00,277 - api_client - INFO - Fetched 274/274 records for GSTIN 24AAJFJ1018J1ZL
+2026-01-18 02:43:00,363 - api_client - INFO - Saved 274 records to D:\Avesh\APARChatBot\NFSShared\CygnetOne\2026\01\18\24AAJFJ1018J1ZL_20250206_120000_to_20260118_024248_20260118_024300.json
+2026-01-18 02:43:00,363 - __main__ - INFO - Saved 274 records for GSTIN 24AAJFJ1018J1ZL
+2026-01-18 02:43:00,364 - __main__ - INFO - Fetching data for GSTIN: 24AMPPB2113G1ZM
+2026-01-18 02:43:00,364 - api_client - INFO - Fetching sale export: GSTIN=24AMPPB2113G1ZM, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:43:00,994 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:43:00,995 - __main__ - ERROR - Error fetching data for GSTIN 24AMPPB2113G1ZM: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:43:00,997 - __main__ - INFO - Fetching data for GSTIN: 24AOLPS9646F1ZF
+2026-01-18 02:43:00,999 - api_client - INFO - Fetching sale export: GSTIN=24AOLPS9646F1ZF, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:43:01,684 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:43:01,685 - __main__ - ERROR - Error fetching data for GSTIN 24AOLPS9646F1ZF: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:43:01,690 - __main__ - INFO - Fetching data for GSTIN: 24AAGCT0879H1Z6
+2026-01-18 02:43:01,692 - api_client - INFO - Fetching sale export: GSTIN=24AAGCT0879H1Z6, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:43:02,350 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:43:02,351 - __main__ - ERROR - Error fetching data for GSTIN 24AAGCT0879H1Z6: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:43:02,357 - __main__ - INFO - Fetching data for GSTIN: 24AATCA1200G1Z5
+2026-01-18 02:43:02,357 - api_client - INFO - Fetching sale export: GSTIN=24AATCA1200G1Z5, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:43:02,967 - api_client - ERROR - API request failed: 422 Client Error: Unprocessable Entity for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:43:02,969 - __main__ - ERROR - Error fetching data for GSTIN 24AATCA1200G1Z5: 422 Client Error: Unprocessable Entity for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:43:02,971 - __main__ - INFO - Fetching data for GSTIN: 24AAKCC8514G1ZP
+2026-01-18 02:43:02,971 - api_client - INFO - Fetching sale export: GSTIN=24AAKCC8514G1ZP, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:43:03,649 - api_client - INFO - API Response: 1 records fetched
+2026-01-18 02:43:03,657 - api_client - INFO - Fetched 1/1 records for GSTIN 24AAKCC8514G1ZP
+2026-01-18 02:43:03,670 - api_client - INFO - Saved 1 records to D:\Avesh\APARChatBot\NFSShared\CygnetOne\2026\01\18\24AAKCC8514G1ZP_20250206_120000_to_20260118_024248_20260118_024303.json
+2026-01-18 02:43:03,671 - __main__ - INFO - Saved 1 records for GSTIN 24AAKCC8514G1ZP
+2026-01-18 02:43:03,672 - __main__ - INFO - Fetching data for GSTIN: 24AAYFA5141Q1ZT
+2026-01-18 02:43:03,673 - api_client - INFO - Fetching sale export: GSTIN=24AAYFA5141Q1ZT, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:43:04,491 - api_client - INFO - API Response: 17 records fetched
+2026-01-18 02:43:04,493 - api_client - INFO - Fetched 17/17 records for GSTIN 24AAYFA5141Q1ZT
+2026-01-18 02:43:04,499 - api_client - INFO - Saved 17 records to D:\Avesh\APARChatBot\NFSShared\CygnetOne\2026\01\18\24AAYFA5141Q1ZT_20250206_120000_to_20260118_024248_20260118_024304.json
+2026-01-18 02:43:04,499 - __main__ - INFO - Saved 17 records for GSTIN 24AAYFA5141Q1ZT
+2026-01-18 02:43:04,500 - __main__ - INFO - Fetching data for GSTIN: 24AABCC5127A2ZE
+2026-01-18 02:43:04,500 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A2ZE, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:43:05,142 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:43:05,143 - __main__ - ERROR - Error fetching data for GSTIN 24AABCC5127A2ZE: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:43:05,146 - __main__ - INFO - Fetching data for GSTIN: 24ADZFS3855R1ZT
+2026-01-18 02:43:05,147 - api_client - INFO - Fetching sale export: GSTIN=24ADZFS3855R1ZT, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:43:05,785 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:43:05,785 - __main__ - ERROR - Error fetching data for GSTIN 24ADZFS3855R1ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:43:05,787 - __main__ - INFO - Fetching data for GSTIN: 24AAICC6455G1ZN
+2026-01-18 02:43:05,788 - api_client - INFO - Fetching sale export: GSTIN=24AAICC6455G1ZN, from=06-02-2025 12:00:00, to=18-01-2026 02:42:48, FY=202425
+2026-01-18 02:43:06,440 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:43:06,441 - __main__ - ERROR - Error fetching data for GSTIN 24AAICC6455G1ZN: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:43:06,597 - db_connection - INFO - Updated task 1 progress: from=2025-02-06T12:00:00, to=2026-01-18T02:42:48.743524, initial_sync=True
+2026-01-18 02:43:06,691 - __main__ - INFO - Task 1 completed: 1784 records, 7 files
+2026-01-18 02:44:06,692 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:44:06,889 - __main__ - INFO - Found 1 active export tasks
+2026-01-18 02:45:06,890 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:45:07,032 - __main__ - INFO - Found 1 active export tasks
+2026-01-18 02:45:07,032 - __main__ - INFO - Running task: Fetch Sales Data (ID: 1)
+2026-01-18 02:45:07,033 - __main__ - INFO - Processing task 1 for subscriber CygnetOne
+2026-01-18 02:45:07,140 - __main__ - INFO - Incremental sync: fetching from 2026-01-18 02:42:48.743524 to 2026-01-18 02:45:07.140603
+2026-01-18 02:45:07,252 - __main__ - INFO - Found 19 entities for subscriber 663
+2026-01-18 02:45:07,252 - __main__ - INFO - Fetching data for GSTIN: 24AAHFC3011G1Z4
+2026-01-18 02:45:07,252 - api_client - INFO - Fetching sale export: GSTIN=24AAHFC3011G1Z4, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:08,017 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:08,018 - __main__ - ERROR - Error fetching data for GSTIN 24AAHFC3011G1Z4: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:08,021 - __main__ - INFO - Fetching data for GSTIN: 27AABCC5127A1Z9
+2026-01-18 02:45:08,022 - api_client - INFO - Fetching sale export: GSTIN=27AABCC5127A1Z9, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:08,684 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:08,684 - __main__ - ERROR - Error fetching data for GSTIN 27AABCC5127A1Z9: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:08,686 - __main__ - INFO - Fetching data for GSTIN: 24AADCC1450E1ZB
+2026-01-18 02:45:08,686 - api_client - INFO - Fetching sale export: GSTIN=24AADCC1450E1ZB, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:09,456 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:09,457 - __main__ - ERROR - Error fetching data for GSTIN 24AADCC1450E1ZB: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:09,461 - __main__ - INFO - Fetching data for GSTIN: 24AAJCM8902B1ZQ
+2026-01-18 02:45:09,462 - api_client - INFO - Fetching sale export: GSTIN=24AAJCM8902B1ZQ, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:10,113 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:10,114 - __main__ - ERROR - Error fetching data for GSTIN 24AAJCM8902B1ZQ: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:10,117 - __main__ - INFO - Fetching data for GSTIN: 24AAIFE2287R2ZT
+2026-01-18 02:45:10,118 - api_client - INFO - Fetching sale export: GSTIN=24AAIFE2287R2ZT, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:10,743 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:10,744 - __main__ - ERROR - Error fetching data for GSTIN 24AAIFE2287R2ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:10,750 - __main__ - INFO - Fetching data for GSTIN: 24AAKCS5705K1Z5
+2026-01-18 02:45:10,750 - api_client - INFO - Fetching sale export: GSTIN=24AAKCS5705K1Z5, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:11,415 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:11,416 - __main__ - ERROR - Error fetching data for GSTIN 24AAKCS5705K1Z5: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:11,419 - __main__ - INFO - Fetching data for GSTIN: 27AABCC5127A2Z8
+2026-01-18 02:45:11,420 - api_client - INFO - Fetching sale export: GSTIN=27AABCC5127A2Z8, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:12,074 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:12,075 - __main__ - ERROR - Error fetching data for GSTIN 27AABCC5127A2Z8: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:12,077 - __main__ - INFO - Fetching data for GSTIN: 24AABCC5127A1ZF
+2026-01-18 02:45:12,079 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A1ZF, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:12,772 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:12,772 - __main__ - ERROR - Error fetching data for GSTIN 24AABCC5127A1ZF: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:12,774 - __main__ - INFO - Fetching data for GSTIN: 24AAGCC7953B1ZU
+2026-01-18 02:45:12,774 - api_client - INFO - Fetching sale export: GSTIN=24AAGCC7953B1ZU, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:13,399 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:13,401 - __main__ - ERROR - Error fetching data for GSTIN 24AAGCC7953B1ZU: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:13,406 - __main__ - INFO - Fetching data for GSTIN: 24AAJFJ1018J1ZL
+2026-01-18 02:45:13,407 - api_client - INFO - Fetching sale export: GSTIN=24AAJFJ1018J1ZL, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:14,085 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:14,085 - __main__ - ERROR - Error fetching data for GSTIN 24AAJFJ1018J1ZL: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:14,087 - __main__ - INFO - Fetching data for GSTIN: 24AMPPB2113G1ZM
+2026-01-18 02:45:14,087 - api_client - INFO - Fetching sale export: GSTIN=24AMPPB2113G1ZM, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:14,725 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:14,726 - __main__ - ERROR - Error fetching data for GSTIN 24AMPPB2113G1ZM: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:14,730 - __main__ - INFO - Fetching data for GSTIN: 24AOLPS9646F1ZF
+2026-01-18 02:45:14,731 - api_client - INFO - Fetching sale export: GSTIN=24AOLPS9646F1ZF, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:15,468 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:15,470 - __main__ - ERROR - Error fetching data for GSTIN 24AOLPS9646F1ZF: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:15,472 - __main__ - INFO - Fetching data for GSTIN: 24AAGCT0879H1Z6
+2026-01-18 02:45:15,473 - api_client - INFO - Fetching sale export: GSTIN=24AAGCT0879H1Z6, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:16,152 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:16,153 - __main__ - ERROR - Error fetching data for GSTIN 24AAGCT0879H1Z6: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:16,155 - __main__ - INFO - Fetching data for GSTIN: 24AATCA1200G1Z5
+2026-01-18 02:45:16,156 - api_client - INFO - Fetching sale export: GSTIN=24AATCA1200G1Z5, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:16,776 - api_client - ERROR - API request failed: 422 Client Error: Unprocessable Entity for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:16,778 - __main__ - ERROR - Error fetching data for GSTIN 24AATCA1200G1Z5: 422 Client Error: Unprocessable Entity for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:16,780 - __main__ - INFO - Fetching data for GSTIN: 24AAKCC8514G1ZP
+2026-01-18 02:45:16,781 - api_client - INFO - Fetching sale export: GSTIN=24AAKCC8514G1ZP, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:17,482 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:17,483 - __main__ - ERROR - Error fetching data for GSTIN 24AAKCC8514G1ZP: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:17,488 - __main__ - INFO - Fetching data for GSTIN: 24AAYFA5141Q1ZT
+2026-01-18 02:45:17,488 - api_client - INFO - Fetching sale export: GSTIN=24AAYFA5141Q1ZT, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:18,125 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:18,126 - __main__ - ERROR - Error fetching data for GSTIN 24AAYFA5141Q1ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:18,129 - __main__ - INFO - Fetching data for GSTIN: 24AABCC5127A2ZE
+2026-01-18 02:45:18,129 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A2ZE, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:18,780 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:18,781 - __main__ - ERROR - Error fetching data for GSTIN 24AABCC5127A2ZE: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:18,787 - __main__ - INFO - Fetching data for GSTIN: 24ADZFS3855R1ZT
+2026-01-18 02:45:18,789 - api_client - INFO - Fetching sale export: GSTIN=24ADZFS3855R1ZT, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:19,484 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:19,485 - __main__ - ERROR - Error fetching data for GSTIN 24ADZFS3855R1ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:19,486 - __main__ - INFO - Fetching data for GSTIN: 24AAICC6455G1ZN
+2026-01-18 02:45:19,486 - api_client - INFO - Fetching sale export: GSTIN=24AAICC6455G1ZN, from=18-01-2026 02:42:48, to=18-01-2026 02:45:07, FY=202526
+2026-01-18 02:45:20,153 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:20,153 - __main__ - ERROR - Error fetching data for GSTIN 24AAICC6455G1ZN: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:45:20,247 - db_connection - INFO - Updated task 1 progress: from=2026-01-18T02:42:48.743524, to=2026-01-18T02:45:07.140603, initial_sync=True
+2026-01-18 02:45:20,338 - __main__ - INFO - Task 1 completed: 0 records, 0 files
+2026-01-18 02:46:20,338 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:46:20,571 - __main__ - INFO - Found 1 active export tasks
+2026-01-18 02:46:20,571 - __main__ - INFO - Running task: Fetch Sales Data (ID: 1)
+2026-01-18 02:46:20,572 - __main__ - INFO - Processing task 1 for subscriber CygnetOne
+2026-01-18 02:46:20,668 - __main__ - INFO - Incremental sync: fetching from 2026-01-18 02:45:07.140603 to 2026-01-18 02:46:20.668074
+2026-01-18 02:46:20,769 - __main__ - INFO - Found 19 entities for subscriber 663
+2026-01-18 02:46:20,770 - __main__ - INFO - Fetching data for GSTIN: 24AAHFC3011G1Z4
+2026-01-18 02:46:20,770 - api_client - INFO - Fetching sale export: GSTIN=24AAHFC3011G1Z4, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:21,501 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:21,503 - __main__ - ERROR - Error fetching data for GSTIN 24AAHFC3011G1Z4: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:21,508 - __main__ - INFO - Fetching data for GSTIN: 27AABCC5127A1Z9
+2026-01-18 02:46:21,509 - api_client - INFO - Fetching sale export: GSTIN=27AABCC5127A1Z9, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:22,188 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:22,189 - __main__ - ERROR - Error fetching data for GSTIN 27AABCC5127A1Z9: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:22,195 - __main__ - INFO - Fetching data for GSTIN: 24AADCC1450E1ZB
+2026-01-18 02:46:22,196 - api_client - INFO - Fetching sale export: GSTIN=24AADCC1450E1ZB, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:22,875 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:22,876 - __main__ - ERROR - Error fetching data for GSTIN 24AADCC1450E1ZB: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:22,882 - __main__ - INFO - Fetching data for GSTIN: 24AAJCM8902B1ZQ
+2026-01-18 02:46:22,883 - api_client - INFO - Fetching sale export: GSTIN=24AAJCM8902B1ZQ, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:23,538 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:23,538 - __main__ - ERROR - Error fetching data for GSTIN 24AAJCM8902B1ZQ: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:23,540 - __main__ - INFO - Fetching data for GSTIN: 24AAIFE2287R2ZT
+2026-01-18 02:46:23,541 - api_client - INFO - Fetching sale export: GSTIN=24AAIFE2287R2ZT, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:24,168 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:24,170 - __main__ - ERROR - Error fetching data for GSTIN 24AAIFE2287R2ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:24,177 - __main__ - INFO - Fetching data for GSTIN: 24AAKCS5705K1Z5
+2026-01-18 02:46:24,178 - api_client - INFO - Fetching sale export: GSTIN=24AAKCS5705K1Z5, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:24,815 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:24,816 - __main__ - ERROR - Error fetching data for GSTIN 24AAKCS5705K1Z5: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:24,821 - __main__ - INFO - Fetching data for GSTIN: 27AABCC5127A2Z8
+2026-01-18 02:46:24,822 - api_client - INFO - Fetching sale export: GSTIN=27AABCC5127A2Z8, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:25,448 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:25,450 - __main__ - ERROR - Error fetching data for GSTIN 27AABCC5127A2Z8: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:25,456 - __main__ - INFO - Fetching data for GSTIN: 24AABCC5127A1ZF
+2026-01-18 02:46:25,457 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A1ZF, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:26,123 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:26,124 - __main__ - ERROR - Error fetching data for GSTIN 24AABCC5127A1ZF: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:26,127 - __main__ - INFO - Fetching data for GSTIN: 24AAGCC7953B1ZU
+2026-01-18 02:46:26,129 - api_client - INFO - Fetching sale export: GSTIN=24AAGCC7953B1ZU, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:26,828 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:26,829 - __main__ - ERROR - Error fetching data for GSTIN 24AAGCC7953B1ZU: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:26,836 - __main__ - INFO - Fetching data for GSTIN: 24AAJFJ1018J1ZL
+2026-01-18 02:46:26,837 - api_client - INFO - Fetching sale export: GSTIN=24AAJFJ1018J1ZL, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:27,469 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:27,470 - __main__ - ERROR - Error fetching data for GSTIN 24AAJFJ1018J1ZL: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:27,472 - __main__ - INFO - Fetching data for GSTIN: 24AMPPB2113G1ZM
+2026-01-18 02:46:27,473 - api_client - INFO - Fetching sale export: GSTIN=24AMPPB2113G1ZM, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:28,089 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:28,090 - __main__ - ERROR - Error fetching data for GSTIN 24AMPPB2113G1ZM: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:28,095 - __main__ - INFO - Fetching data for GSTIN: 24AOLPS9646F1ZF
+2026-01-18 02:46:28,096 - api_client - INFO - Fetching sale export: GSTIN=24AOLPS9646F1ZF, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:28,731 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:28,732 - __main__ - ERROR - Error fetching data for GSTIN 24AOLPS9646F1ZF: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:28,739 - __main__ - INFO - Fetching data for GSTIN: 24AAGCT0879H1Z6
+2026-01-18 02:46:28,740 - api_client - INFO - Fetching sale export: GSTIN=24AAGCT0879H1Z6, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:29,396 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:29,397 - __main__ - ERROR - Error fetching data for GSTIN 24AAGCT0879H1Z6: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:29,403 - __main__ - INFO - Fetching data for GSTIN: 24AATCA1200G1Z5
+2026-01-18 02:46:29,404 - api_client - INFO - Fetching sale export: GSTIN=24AATCA1200G1Z5, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:30,037 - api_client - ERROR - API request failed: 422 Client Error: Unprocessable Entity for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:30,038 - __main__ - ERROR - Error fetching data for GSTIN 24AATCA1200G1Z5: 422 Client Error: Unprocessable Entity for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:30,043 - __main__ - INFO - Fetching data for GSTIN: 24AAKCC8514G1ZP
+2026-01-18 02:46:30,044 - api_client - INFO - Fetching sale export: GSTIN=24AAKCC8514G1ZP, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:30,707 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:30,708 - __main__ - ERROR - Error fetching data for GSTIN 24AAKCC8514G1ZP: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:30,712 - __main__ - INFO - Fetching data for GSTIN: 24AAYFA5141Q1ZT
+2026-01-18 02:46:30,712 - api_client - INFO - Fetching sale export: GSTIN=24AAYFA5141Q1ZT, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:31,427 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:31,428 - __main__ - ERROR - Error fetching data for GSTIN 24AAYFA5141Q1ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:31,433 - __main__ - INFO - Fetching data for GSTIN: 24AABCC5127A2ZE
+2026-01-18 02:46:31,434 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A2ZE, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:32,088 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:32,088 - __main__ - ERROR - Error fetching data for GSTIN 24AABCC5127A2ZE: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:32,090 - __main__ - INFO - Fetching data for GSTIN: 24ADZFS3855R1ZT
+2026-01-18 02:46:32,090 - api_client - INFO - Fetching sale export: GSTIN=24ADZFS3855R1ZT, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:32,726 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:32,726 - __main__ - ERROR - Error fetching data for GSTIN 24ADZFS3855R1ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:32,729 - __main__ - INFO - Fetching data for GSTIN: 24AAICC6455G1ZN
+2026-01-18 02:46:32,730 - api_client - INFO - Fetching sale export: GSTIN=24AAICC6455G1ZN, from=18-01-2026 02:45:07, to=18-01-2026 02:46:20, FY=202526
+2026-01-18 02:46:33,452 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:33,453 - __main__ - ERROR - Error fetching data for GSTIN 24AAICC6455G1ZN: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:46:33,597 - db_connection - INFO - Updated task 1 progress: from=2026-01-18T02:45:07.140603, to=2026-01-18T02:46:20.668074, initial_sync=True
+2026-01-18 02:46:33,681 - __main__ - INFO - Task 1 completed: 0 records, 0 files
+2026-01-18 02:47:33,683 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:47:33,897 - __main__ - INFO - Found 1 active export tasks
+2026-01-18 02:47:33,897 - __main__ - INFO - Running task: Fetch Sales Data (ID: 1)
+2026-01-18 02:47:33,897 - __main__ - INFO - Processing task 1 for subscriber CygnetOne
+2026-01-18 02:47:34,006 - __main__ - INFO - Incremental sync: fetching from 2026-01-18 02:46:20.668074 to 2026-01-18 02:47:34.006479
+2026-01-18 02:47:34,110 - __main__ - INFO - Found 19 entities for subscriber 663
+2026-01-18 02:47:34,110 - __main__ - INFO - Fetching data for GSTIN: 24AAHFC3011G1Z4
+2026-01-18 02:47:34,111 - api_client - INFO - Fetching sale export: GSTIN=24AAHFC3011G1Z4, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:34,851 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:34,852 - __main__ - ERROR - Error fetching data for GSTIN 24AAHFC3011G1Z4: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:34,855 - __main__ - INFO - Fetching data for GSTIN: 27AABCC5127A1Z9
+2026-01-18 02:47:34,856 - api_client - INFO - Fetching sale export: GSTIN=27AABCC5127A1Z9, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:35,492 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:35,493 - __main__ - ERROR - Error fetching data for GSTIN 27AABCC5127A1Z9: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:35,498 - __main__ - INFO - Fetching data for GSTIN: 24AADCC1450E1ZB
+2026-01-18 02:47:35,499 - api_client - INFO - Fetching sale export: GSTIN=24AADCC1450E1ZB, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:36,182 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:36,183 - __main__ - ERROR - Error fetching data for GSTIN 24AADCC1450E1ZB: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:36,186 - __main__ - INFO - Fetching data for GSTIN: 24AAJCM8902B1ZQ
+2026-01-18 02:47:36,187 - api_client - INFO - Fetching sale export: GSTIN=24AAJCM8902B1ZQ, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:36,850 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:36,851 - __main__ - ERROR - Error fetching data for GSTIN 24AAJCM8902B1ZQ: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:36,857 - __main__ - INFO - Fetching data for GSTIN: 24AAIFE2287R2ZT
+2026-01-18 02:47:36,858 - api_client - INFO - Fetching sale export: GSTIN=24AAIFE2287R2ZT, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:37,517 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:37,518 - __main__ - ERROR - Error fetching data for GSTIN 24AAIFE2287R2ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:37,523 - __main__ - INFO - Fetching data for GSTIN: 24AAKCS5705K1Z5
+2026-01-18 02:47:37,524 - api_client - INFO - Fetching sale export: GSTIN=24AAKCS5705K1Z5, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:38,185 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:38,185 - __main__ - ERROR - Error fetching data for GSTIN 24AAKCS5705K1Z5: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:38,186 - __main__ - INFO - Fetching data for GSTIN: 27AABCC5127A2Z8
+2026-01-18 02:47:38,186 - api_client - INFO - Fetching sale export: GSTIN=27AABCC5127A2Z8, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:38,825 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:38,827 - __main__ - ERROR - Error fetching data for GSTIN 27AABCC5127A2Z8: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:38,833 - __main__ - INFO - Fetching data for GSTIN: 24AABCC5127A1ZF
+2026-01-18 02:47:38,835 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A1ZF, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:39,527 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:39,529 - __main__ - ERROR - Error fetching data for GSTIN 24AABCC5127A1ZF: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:39,538 - __main__ - INFO - Fetching data for GSTIN: 24AAGCC7953B1ZU
+2026-01-18 02:47:39,539 - api_client - INFO - Fetching sale export: GSTIN=24AAGCC7953B1ZU, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:40,227 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:40,228 - __main__ - ERROR - Error fetching data for GSTIN 24AAGCC7953B1ZU: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:40,233 - __main__ - INFO - Fetching data for GSTIN: 24AAJFJ1018J1ZL
+2026-01-18 02:47:40,234 - api_client - INFO - Fetching sale export: GSTIN=24AAJFJ1018J1ZL, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:40,882 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:40,883 - __main__ - ERROR - Error fetching data for GSTIN 24AAJFJ1018J1ZL: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:40,885 - __main__ - INFO - Fetching data for GSTIN: 24AMPPB2113G1ZM
+2026-01-18 02:47:40,886 - api_client - INFO - Fetching sale export: GSTIN=24AMPPB2113G1ZM, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:41,524 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:41,525 - __main__ - ERROR - Error fetching data for GSTIN 24AMPPB2113G1ZM: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:41,531 - __main__ - INFO - Fetching data for GSTIN: 24AOLPS9646F1ZF
+2026-01-18 02:47:41,532 - api_client - INFO - Fetching sale export: GSTIN=24AOLPS9646F1ZF, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:42,181 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:42,182 - __main__ - ERROR - Error fetching data for GSTIN 24AOLPS9646F1ZF: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:42,188 - __main__ - INFO - Fetching data for GSTIN: 24AAGCT0879H1Z6
+2026-01-18 02:47:42,190 - api_client - INFO - Fetching sale export: GSTIN=24AAGCT0879H1Z6, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:42,841 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:42,842 - __main__ - ERROR - Error fetching data for GSTIN 24AAGCT0879H1Z6: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:42,846 - __main__ - INFO - Fetching data for GSTIN: 24AATCA1200G1Z5
+2026-01-18 02:47:42,847 - api_client - INFO - Fetching sale export: GSTIN=24AATCA1200G1Z5, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:43,504 - api_client - ERROR - API request failed: 422 Client Error: Unprocessable Entity for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:43,504 - __main__ - ERROR - Error fetching data for GSTIN 24AATCA1200G1Z5: 422 Client Error: Unprocessable Entity for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:43,507 - __main__ - INFO - Fetching data for GSTIN: 24AAKCC8514G1ZP
+2026-01-18 02:47:43,508 - api_client - INFO - Fetching sale export: GSTIN=24AAKCC8514G1ZP, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:44,161 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:44,163 - __main__ - ERROR - Error fetching data for GSTIN 24AAKCC8514G1ZP: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:44,166 - __main__ - INFO - Fetching data for GSTIN: 24AAYFA5141Q1ZT
+2026-01-18 02:47:44,167 - api_client - INFO - Fetching sale export: GSTIN=24AAYFA5141Q1ZT, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:44,789 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:44,790 - __main__ - ERROR - Error fetching data for GSTIN 24AAYFA5141Q1ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:44,796 - __main__ - INFO - Fetching data for GSTIN: 24AABCC5127A2ZE
+2026-01-18 02:47:44,796 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A2ZE, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:45,494 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:45,495 - __main__ - ERROR - Error fetching data for GSTIN 24AABCC5127A2ZE: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:45,501 - __main__ - INFO - Fetching data for GSTIN: 24ADZFS3855R1ZT
+2026-01-18 02:47:45,502 - api_client - INFO - Fetching sale export: GSTIN=24ADZFS3855R1ZT, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:46,155 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:46,156 - __main__ - ERROR - Error fetching data for GSTIN 24ADZFS3855R1ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:46,160 - __main__ - INFO - Fetching data for GSTIN: 24AAICC6455G1ZN
+2026-01-18 02:47:46,161 - api_client - INFO - Fetching sale export: GSTIN=24AAICC6455G1ZN, from=18-01-2026 02:46:20, to=18-01-2026 02:47:34, FY=202526
+2026-01-18 02:47:46,830 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:46,831 - __main__ - ERROR - Error fetching data for GSTIN 24AAICC6455G1ZN: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:47:47,016 - db_connection - INFO - Updated task 1 progress: from=2026-01-18T02:46:20.668074, to=2026-01-18T02:47:34.006479, initial_sync=True
+2026-01-18 02:47:47,114 - __main__ - INFO - Task 1 completed: 0 records, 0 files
+2026-01-18 02:48:47,115 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:48:47,326 - __main__ - INFO - Found 1 active export tasks
+2026-01-18 02:48:47,327 - __main__ - INFO - Running task: Fetch Sales Data (ID: 1)
+2026-01-18 02:48:47,327 - __main__ - INFO - Processing task 1 for subscriber CygnetOne
+2026-01-18 02:48:47,425 - __main__ - INFO - Incremental sync: fetching from 2026-01-18 02:47:34.006479 to 2026-01-18 02:48:47.425218
+2026-01-18 02:48:47,524 - __main__ - INFO - Found 19 entities for subscriber 663
+2026-01-18 02:48:47,524 - __main__ - INFO - Fetching data for GSTIN: 24AAHFC3011G1Z4
+2026-01-18 02:48:47,524 - api_client - INFO - Fetching sale export: GSTIN=24AAHFC3011G1Z4, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:48:48,316 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:48,317 - __main__ - ERROR - Error fetching data for GSTIN 24AAHFC3011G1Z4: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:48,324 - __main__ - INFO - Fetching data for GSTIN: 27AABCC5127A1Z9
+2026-01-18 02:48:48,325 - api_client - INFO - Fetching sale export: GSTIN=27AABCC5127A1Z9, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:48:49,000 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:49,001 - __main__ - ERROR - Error fetching data for GSTIN 27AABCC5127A1Z9: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:49,006 - __main__ - INFO - Fetching data for GSTIN: 24AADCC1450E1ZB
+2026-01-18 02:48:49,006 - api_client - INFO - Fetching sale export: GSTIN=24AADCC1450E1ZB, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:48:49,657 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:49,658 - __main__ - ERROR - Error fetching data for GSTIN 24AADCC1450E1ZB: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:49,669 - __main__ - INFO - Fetching data for GSTIN: 24AAJCM8902B1ZQ
+2026-01-18 02:48:49,670 - api_client - INFO - Fetching sale export: GSTIN=24AAJCM8902B1ZQ, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:48:50,320 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:50,321 - __main__ - ERROR - Error fetching data for GSTIN 24AAJCM8902B1ZQ: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:50,326 - __main__ - INFO - Fetching data for GSTIN: 24AAIFE2287R2ZT
+2026-01-18 02:48:50,327 - api_client - INFO - Fetching sale export: GSTIN=24AAIFE2287R2ZT, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:48:50,971 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:50,972 - __main__ - ERROR - Error fetching data for GSTIN 24AAIFE2287R2ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:50,977 - __main__ - INFO - Fetching data for GSTIN: 24AAKCS5705K1Z5
+2026-01-18 02:48:50,978 - api_client - INFO - Fetching sale export: GSTIN=24AAKCS5705K1Z5, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:48:51,614 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:51,616 - __main__ - ERROR - Error fetching data for GSTIN 24AAKCS5705K1Z5: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:51,621 - __main__ - INFO - Fetching data for GSTIN: 27AABCC5127A2Z8
+2026-01-18 02:48:51,621 - api_client - INFO - Fetching sale export: GSTIN=27AABCC5127A2Z8, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:48:52,278 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:52,279 - __main__ - ERROR - Error fetching data for GSTIN 27AABCC5127A2Z8: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:52,286 - __main__ - INFO - Fetching data for GSTIN: 24AABCC5127A1ZF
+2026-01-18 02:48:52,287 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A1ZF, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:48:52,970 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:52,971 - __main__ - ERROR - Error fetching data for GSTIN 24AABCC5127A1ZF: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:52,974 - __main__ - INFO - Fetching data for GSTIN: 24AAGCC7953B1ZU
+2026-01-18 02:48:52,974 - api_client - INFO - Fetching sale export: GSTIN=24AAGCC7953B1ZU, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:48:53,656 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:53,657 - __main__ - ERROR - Error fetching data for GSTIN 24AAGCC7953B1ZU: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:53,661 - __main__ - INFO - Fetching data for GSTIN: 24AAJFJ1018J1ZL
+2026-01-18 02:48:53,662 - api_client - INFO - Fetching sale export: GSTIN=24AAJFJ1018J1ZL, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:48:54,316 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:54,318 - __main__ - ERROR - Error fetching data for GSTIN 24AAJFJ1018J1ZL: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:54,324 - __main__ - INFO - Fetching data for GSTIN: 24AMPPB2113G1ZM
+2026-01-18 02:48:54,325 - api_client - INFO - Fetching sale export: GSTIN=24AMPPB2113G1ZM, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:48:55,001 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:55,002 - __main__ - ERROR - Error fetching data for GSTIN 24AMPPB2113G1ZM: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:55,005 - __main__ - INFO - Fetching data for GSTIN: 24AOLPS9646F1ZF
+2026-01-18 02:48:55,005 - api_client - INFO - Fetching sale export: GSTIN=24AOLPS9646F1ZF, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:48:55,626 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:55,627 - __main__ - ERROR - Error fetching data for GSTIN 24AOLPS9646F1ZF: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:55,634 - __main__ - INFO - Fetching data for GSTIN: 24AAGCT0879H1Z6
+2026-01-18 02:48:55,636 - api_client - INFO - Fetching sale export: GSTIN=24AAGCT0879H1Z6, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:48:56,314 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:56,315 - __main__ - ERROR - Error fetching data for GSTIN 24AAGCT0879H1Z6: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:56,317 - __main__ - INFO - Fetching data for GSTIN: 24AATCA1200G1Z5
+2026-01-18 02:48:56,318 - api_client - INFO - Fetching sale export: GSTIN=24AATCA1200G1Z5, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:48:56,932 - api_client - ERROR - API request failed: 422 Client Error: Unprocessable Entity for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:56,934 - __main__ - ERROR - Error fetching data for GSTIN 24AATCA1200G1Z5: 422 Client Error: Unprocessable Entity for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:56,943 - __main__ - INFO - Fetching data for GSTIN: 24AAKCC8514G1ZP
+2026-01-18 02:48:56,944 - api_client - INFO - Fetching sale export: GSTIN=24AAKCC8514G1ZP, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:48:57,611 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:57,612 - __main__ - ERROR - Error fetching data for GSTIN 24AAKCC8514G1ZP: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:57,619 - __main__ - INFO - Fetching data for GSTIN: 24AAYFA5141Q1ZT
+2026-01-18 02:48:57,620 - api_client - INFO - Fetching sale export: GSTIN=24AAYFA5141Q1ZT, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:48:58,305 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:58,306 - __main__ - ERROR - Error fetching data for GSTIN 24AAYFA5141Q1ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:58,312 - __main__ - INFO - Fetching data for GSTIN: 24AABCC5127A2ZE
+2026-01-18 02:48:58,314 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A2ZE, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:48:58,972 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:58,973 - __main__ - ERROR - Error fetching data for GSTIN 24AABCC5127A2ZE: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:58,976 - __main__ - INFO - Fetching data for GSTIN: 24ADZFS3855R1ZT
+2026-01-18 02:48:58,977 - api_client - INFO - Fetching sale export: GSTIN=24ADZFS3855R1ZT, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:48:59,629 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:59,629 - __main__ - ERROR - Error fetching data for GSTIN 24ADZFS3855R1ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:48:59,631 - __main__ - INFO - Fetching data for GSTIN: 24AAICC6455G1ZN
+2026-01-18 02:48:59,631 - api_client - INFO - Fetching sale export: GSTIN=24AAICC6455G1ZN, from=18-01-2026 02:47:34, to=18-01-2026 02:48:47, FY=202526
+2026-01-18 02:49:00,314 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:49:00,315 - __main__ - ERROR - Error fetching data for GSTIN 24AAICC6455G1ZN: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:49:00,561 - db_connection - INFO - Updated task 1 progress: from=2026-01-18T02:47:34.006479, to=2026-01-18T02:48:47.425218, initial_sync=True
+2026-01-18 02:49:00,677 - __main__ - INFO - Task 1 completed: 0 records, 0 files
+2026-01-18 02:50:00,678 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:50:00,790 - __main__ - INFO - Found 1 active export tasks
+2026-01-18 02:50:00,790 - __main__ - INFO - Running task: Fetch Sales Data (ID: 1)
+2026-01-18 02:50:00,792 - __main__ - INFO - Processing task 1 for subscriber CygnetOne
+2026-01-18 02:50:00,892 - __main__ - INFO - Incremental sync: fetching from 2026-01-18 02:48:47.425218 to 2026-01-18 02:50:00.892278
+2026-01-18 02:50:00,993 - __main__ - INFO - Found 19 entities for subscriber 663
+2026-01-18 02:50:00,994 - __main__ - INFO - Fetching data for GSTIN: 24AAHFC3011G1Z4
+2026-01-18 02:50:00,994 - api_client - INFO - Fetching sale export: GSTIN=24AAHFC3011G1Z4, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:01,699 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:01,699 - __main__ - ERROR - Error fetching data for GSTIN 24AAHFC3011G1Z4: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:01,701 - __main__ - INFO - Fetching data for GSTIN: 27AABCC5127A1Z9
+2026-01-18 02:50:01,701 - api_client - INFO - Fetching sale export: GSTIN=27AABCC5127A1Z9, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:02,436 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:02,437 - __main__ - ERROR - Error fetching data for GSTIN 27AABCC5127A1Z9: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:02,443 - __main__ - INFO - Fetching data for GSTIN: 24AADCC1450E1ZB
+2026-01-18 02:50:02,444 - api_client - INFO - Fetching sale export: GSTIN=24AADCC1450E1ZB, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:03,132 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:03,133 - __main__ - ERROR - Error fetching data for GSTIN 24AADCC1450E1ZB: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:03,135 - __main__ - INFO - Fetching data for GSTIN: 24AAJCM8902B1ZQ
+2026-01-18 02:50:03,136 - api_client - INFO - Fetching sale export: GSTIN=24AAJCM8902B1ZQ, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:03,796 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:03,798 - __main__ - ERROR - Error fetching data for GSTIN 24AAJCM8902B1ZQ: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:03,808 - __main__ - INFO - Fetching data for GSTIN: 24AAIFE2287R2ZT
+2026-01-18 02:50:03,809 - api_client - INFO - Fetching sale export: GSTIN=24AAIFE2287R2ZT, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:04,451 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:04,453 - __main__ - ERROR - Error fetching data for GSTIN 24AAIFE2287R2ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:04,460 - __main__ - INFO - Fetching data for GSTIN: 24AAKCS5705K1Z5
+2026-01-18 02:50:04,461 - api_client - INFO - Fetching sale export: GSTIN=24AAKCS5705K1Z5, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:05,112 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:05,113 - __main__ - ERROR - Error fetching data for GSTIN 24AAKCS5705K1Z5: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:05,118 - __main__ - INFO - Fetching data for GSTIN: 27AABCC5127A2Z8
+2026-01-18 02:50:05,119 - api_client - INFO - Fetching sale export: GSTIN=27AABCC5127A2Z8, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:05,788 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:05,789 - __main__ - ERROR - Error fetching data for GSTIN 27AABCC5127A2Z8: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:05,790 - __main__ - INFO - Fetching data for GSTIN: 24AABCC5127A1ZF
+2026-01-18 02:50:05,790 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A1ZF, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:06,484 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:06,484 - __main__ - ERROR - Error fetching data for GSTIN 24AABCC5127A1ZF: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:06,488 - __main__ - INFO - Fetching data for GSTIN: 24AAGCC7953B1ZU
+2026-01-18 02:50:06,489 - api_client - INFO - Fetching sale export: GSTIN=24AAGCC7953B1ZU, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:07,177 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:07,178 - __main__ - ERROR - Error fetching data for GSTIN 24AAGCC7953B1ZU: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:07,179 - __main__ - INFO - Fetching data for GSTIN: 24AAJFJ1018J1ZL
+2026-01-18 02:50:07,180 - api_client - INFO - Fetching sale export: GSTIN=24AAJFJ1018J1ZL, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:07,819 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:07,819 - __main__ - ERROR - Error fetching data for GSTIN 24AAJFJ1018J1ZL: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:07,821 - __main__ - INFO - Fetching data for GSTIN: 24AMPPB2113G1ZM
+2026-01-18 02:50:07,822 - api_client - INFO - Fetching sale export: GSTIN=24AMPPB2113G1ZM, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:08,482 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:08,483 - __main__ - ERROR - Error fetching data for GSTIN 24AMPPB2113G1ZM: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:08,486 - __main__ - INFO - Fetching data for GSTIN: 24AOLPS9646F1ZF
+2026-01-18 02:50:08,487 - api_client - INFO - Fetching sale export: GSTIN=24AOLPS9646F1ZF, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:09,160 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:09,162 - __main__ - ERROR - Error fetching data for GSTIN 24AOLPS9646F1ZF: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:09,165 - __main__ - INFO - Fetching data for GSTIN: 24AAGCT0879H1Z6
+2026-01-18 02:50:09,165 - api_client - INFO - Fetching sale export: GSTIN=24AAGCT0879H1Z6, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:09,809 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:09,809 - __main__ - ERROR - Error fetching data for GSTIN 24AAGCT0879H1Z6: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:09,810 - __main__ - INFO - Fetching data for GSTIN: 24AATCA1200G1Z5
+2026-01-18 02:50:09,810 - api_client - INFO - Fetching sale export: GSTIN=24AATCA1200G1Z5, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:10,405 - api_client - ERROR - API request failed: 422 Client Error: Unprocessable Entity for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:10,406 - __main__ - ERROR - Error fetching data for GSTIN 24AATCA1200G1Z5: 422 Client Error: Unprocessable Entity for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:10,408 - __main__ - INFO - Fetching data for GSTIN: 24AAKCC8514G1ZP
+2026-01-18 02:50:10,409 - api_client - INFO - Fetching sale export: GSTIN=24AAKCC8514G1ZP, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:11,027 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:11,027 - __main__ - ERROR - Error fetching data for GSTIN 24AAKCC8514G1ZP: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:11,028 - __main__ - INFO - Fetching data for GSTIN: 24AAYFA5141Q1ZT
+2026-01-18 02:50:11,028 - api_client - INFO - Fetching sale export: GSTIN=24AAYFA5141Q1ZT, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:11,712 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:11,713 - __main__ - ERROR - Error fetching data for GSTIN 24AAYFA5141Q1ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:11,716 - __main__ - INFO - Fetching data for GSTIN: 24AABCC5127A2ZE
+2026-01-18 02:50:11,717 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A2ZE, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:12,341 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:12,342 - __main__ - ERROR - Error fetching data for GSTIN 24AABCC5127A2ZE: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:12,348 - __main__ - INFO - Fetching data for GSTIN: 24ADZFS3855R1ZT
+2026-01-18 02:50:12,350 - api_client - INFO - Fetching sale export: GSTIN=24ADZFS3855R1ZT, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:12,996 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:12,997 - __main__ - ERROR - Error fetching data for GSTIN 24ADZFS3855R1ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:13,001 - __main__ - INFO - Fetching data for GSTIN: 24AAICC6455G1ZN
+2026-01-18 02:50:13,002 - api_client - INFO - Fetching sale export: GSTIN=24AAICC6455G1ZN, from=18-01-2026 02:48:47, to=18-01-2026 02:50:00, FY=202526
+2026-01-18 02:50:13,654 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:13,655 - __main__ - ERROR - Error fetching data for GSTIN 24AAICC6455G1ZN: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:50:13,757 - db_connection - INFO - Updated task 1 progress: from=2026-01-18T02:48:47.425218, to=2026-01-18T02:50:00.892278, initial_sync=True
+2026-01-18 02:50:13,852 - __main__ - INFO - Task 1 completed: 0 records, 0 files
+2026-01-18 02:51:13,852 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:51:13,983 - __main__ - INFO - Found 1 active export tasks
+2026-01-18 02:51:13,984 - __main__ - INFO - Running task: Fetch Sales Data (ID: 1)
+2026-01-18 02:51:13,984 - __main__ - INFO - Processing task 1 for subscriber CygnetOne
+2026-01-18 02:51:14,090 - __main__ - INFO - Incremental sync: fetching from 2026-01-18 02:50:00.892278 to 2026-01-18 02:51:14.090377
+2026-01-18 02:51:14,200 - __main__ - INFO - Found 19 entities for subscriber 663
+2026-01-18 02:51:14,200 - __main__ - INFO - Fetching data for GSTIN: 24AAHFC3011G1Z4
+2026-01-18 02:51:14,201 - api_client - INFO - Fetching sale export: GSTIN=24AAHFC3011G1Z4, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:14,899 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:14,899 - __main__ - ERROR - Error fetching data for GSTIN 24AAHFC3011G1Z4: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:14,902 - __main__ - INFO - Fetching data for GSTIN: 27AABCC5127A1Z9
+2026-01-18 02:51:14,902 - api_client - INFO - Fetching sale export: GSTIN=27AABCC5127A1Z9, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:15,549 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:15,550 - __main__ - ERROR - Error fetching data for GSTIN 27AABCC5127A1Z9: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:15,555 - __main__ - INFO - Fetching data for GSTIN: 24AADCC1450E1ZB
+2026-01-18 02:51:15,557 - api_client - INFO - Fetching sale export: GSTIN=24AADCC1450E1ZB, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:16,263 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:16,263 - __main__ - ERROR - Error fetching data for GSTIN 24AADCC1450E1ZB: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:16,265 - __main__ - INFO - Fetching data for GSTIN: 24AAJCM8902B1ZQ
+2026-01-18 02:51:16,265 - api_client - INFO - Fetching sale export: GSTIN=24AAJCM8902B1ZQ, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:16,944 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:16,944 - __main__ - ERROR - Error fetching data for GSTIN 24AAJCM8902B1ZQ: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:16,945 - __main__ - INFO - Fetching data for GSTIN: 24AAIFE2287R2ZT
+2026-01-18 02:51:16,946 - api_client - INFO - Fetching sale export: GSTIN=24AAIFE2287R2ZT, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:17,593 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:17,594 - __main__ - ERROR - Error fetching data for GSTIN 24AAIFE2287R2ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:17,595 - __main__ - INFO - Fetching data for GSTIN: 24AAKCS5705K1Z5
+2026-01-18 02:51:17,595 - api_client - INFO - Fetching sale export: GSTIN=24AAKCS5705K1Z5, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:18,289 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:18,290 - __main__ - ERROR - Error fetching data for GSTIN 24AAKCS5705K1Z5: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:18,298 - __main__ - INFO - Fetching data for GSTIN: 27AABCC5127A2Z8
+2026-01-18 02:51:18,299 - api_client - INFO - Fetching sale export: GSTIN=27AABCC5127A2Z8, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:18,970 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:18,970 - __main__ - ERROR - Error fetching data for GSTIN 27AABCC5127A2Z8: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:18,973 - __main__ - INFO - Fetching data for GSTIN: 24AABCC5127A1ZF
+2026-01-18 02:51:18,973 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A1ZF, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:19,683 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:19,684 - __main__ - ERROR - Error fetching data for GSTIN 24AABCC5127A1ZF: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:19,686 - __main__ - INFO - Fetching data for GSTIN: 24AAGCC7953B1ZU
+2026-01-18 02:51:19,687 - api_client - INFO - Fetching sale export: GSTIN=24AAGCC7953B1ZU, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:20,346 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:20,347 - __main__ - ERROR - Error fetching data for GSTIN 24AAGCC7953B1ZU: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:20,352 - __main__ - INFO - Fetching data for GSTIN: 24AAJFJ1018J1ZL
+2026-01-18 02:51:20,353 - api_client - INFO - Fetching sale export: GSTIN=24AAJFJ1018J1ZL, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:20,999 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:21,000 - __main__ - ERROR - Error fetching data for GSTIN 24AAJFJ1018J1ZL: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:21,002 - __main__ - INFO - Fetching data for GSTIN: 24AMPPB2113G1ZM
+2026-01-18 02:51:21,003 - api_client - INFO - Fetching sale export: GSTIN=24AMPPB2113G1ZM, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:21,629 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:21,630 - __main__ - ERROR - Error fetching data for GSTIN 24AMPPB2113G1ZM: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:21,635 - __main__ - INFO - Fetching data for GSTIN: 24AOLPS9646F1ZF
+2026-01-18 02:51:21,635 - api_client - INFO - Fetching sale export: GSTIN=24AOLPS9646F1ZF, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:22,303 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:22,303 - __main__ - ERROR - Error fetching data for GSTIN 24AOLPS9646F1ZF: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:22,305 - __main__ - INFO - Fetching data for GSTIN: 24AAGCT0879H1Z6
+2026-01-18 02:51:22,305 - api_client - INFO - Fetching sale export: GSTIN=24AAGCT0879H1Z6, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:22,979 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:22,979 - __main__ - ERROR - Error fetching data for GSTIN 24AAGCT0879H1Z6: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:22,981 - __main__ - INFO - Fetching data for GSTIN: 24AATCA1200G1Z5
+2026-01-18 02:51:22,981 - api_client - INFO - Fetching sale export: GSTIN=24AATCA1200G1Z5, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:23,585 - api_client - ERROR - API request failed: 422 Client Error: Unprocessable Entity for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:23,585 - __main__ - ERROR - Error fetching data for GSTIN 24AATCA1200G1Z5: 422 Client Error: Unprocessable Entity for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:23,587 - __main__ - INFO - Fetching data for GSTIN: 24AAKCC8514G1ZP
+2026-01-18 02:51:23,588 - api_client - INFO - Fetching sale export: GSTIN=24AAKCC8514G1ZP, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:24,269 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:24,269 - __main__ - ERROR - Error fetching data for GSTIN 24AAKCC8514G1ZP: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:24,271 - __main__ - INFO - Fetching data for GSTIN: 24AAYFA5141Q1ZT
+2026-01-18 02:51:24,272 - api_client - INFO - Fetching sale export: GSTIN=24AAYFA5141Q1ZT, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:24,907 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:24,908 - __main__ - ERROR - Error fetching data for GSTIN 24AAYFA5141Q1ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:24,911 - __main__ - INFO - Fetching data for GSTIN: 24AABCC5127A2ZE
+2026-01-18 02:51:24,911 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A2ZE, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:25,586 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:25,587 - __main__ - ERROR - Error fetching data for GSTIN 24AABCC5127A2ZE: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:25,589 - __main__ - INFO - Fetching data for GSTIN: 24ADZFS3855R1ZT
+2026-01-18 02:51:25,590 - api_client - INFO - Fetching sale export: GSTIN=24ADZFS3855R1ZT, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:26,232 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:26,232 - __main__ - ERROR - Error fetching data for GSTIN 24ADZFS3855R1ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:26,234 - __main__ - INFO - Fetching data for GSTIN: 24AAICC6455G1ZN
+2026-01-18 02:51:26,235 - api_client - INFO - Fetching sale export: GSTIN=24AAICC6455G1ZN, from=18-01-2026 02:50:00, to=18-01-2026 02:51:14, FY=202526
+2026-01-18 02:51:26,897 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:26,898 - __main__ - ERROR - Error fetching data for GSTIN 24AAICC6455G1ZN: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:51:27,005 - db_connection - INFO - Updated task 1 progress: from=2026-01-18T02:50:00.892278, to=2026-01-18T02:51:14.090377, initial_sync=True
+2026-01-18 02:51:27,110 - __main__ - INFO - Task 1 completed: 0 records, 0 files
+2026-01-18 02:52:27,110 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:52:27,260 - __main__ - INFO - Found 1 active export tasks
+2026-01-18 02:52:27,261 - __main__ - INFO - Running task: Fetch Sales Data (ID: 1)
+2026-01-18 02:52:27,261 - __main__ - INFO - Processing task 1 for subscriber CygnetOne
+2026-01-18 02:52:27,359 - __main__ - INFO - Incremental sync: fetching from 2026-01-18 02:51:14.090377 to 2026-01-18 02:52:27.359799
+2026-01-18 02:52:27,456 - __main__ - INFO - Found 19 entities for subscriber 663
+2026-01-18 02:52:27,456 - __main__ - INFO - Fetching data for GSTIN: 24AAHFC3011G1Z4
+2026-01-18 02:52:27,456 - api_client - INFO - Fetching sale export: GSTIN=24AAHFC3011G1Z4, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:28,135 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:28,136 - __main__ - ERROR - Error fetching data for GSTIN 24AAHFC3011G1Z4: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:28,137 - __main__ - INFO - Fetching data for GSTIN: 27AABCC5127A1Z9
+2026-01-18 02:52:28,137 - api_client - INFO - Fetching sale export: GSTIN=27AABCC5127A1Z9, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:28,788 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:28,788 - __main__ - ERROR - Error fetching data for GSTIN 27AABCC5127A1Z9: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:28,789 - __main__ - INFO - Fetching data for GSTIN: 24AADCC1450E1ZB
+2026-01-18 02:52:28,789 - api_client - INFO - Fetching sale export: GSTIN=24AADCC1450E1ZB, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:29,411 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:29,412 - __main__ - ERROR - Error fetching data for GSTIN 24AADCC1450E1ZB: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:29,416 - __main__ - INFO - Fetching data for GSTIN: 24AAJCM8902B1ZQ
+2026-01-18 02:52:29,416 - api_client - INFO - Fetching sale export: GSTIN=24AAJCM8902B1ZQ, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:30,020 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:30,021 - __main__ - ERROR - Error fetching data for GSTIN 24AAJCM8902B1ZQ: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:30,023 - __main__ - INFO - Fetching data for GSTIN: 24AAIFE2287R2ZT
+2026-01-18 02:52:30,023 - api_client - INFO - Fetching sale export: GSTIN=24AAIFE2287R2ZT, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:30,679 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:30,680 - __main__ - ERROR - Error fetching data for GSTIN 24AAIFE2287R2ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:30,683 - __main__ - INFO - Fetching data for GSTIN: 24AAKCS5705K1Z5
+2026-01-18 02:52:30,684 - api_client - INFO - Fetching sale export: GSTIN=24AAKCS5705K1Z5, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:31,337 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:31,338 - __main__ - ERROR - Error fetching data for GSTIN 24AAKCS5705K1Z5: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:31,340 - __main__ - INFO - Fetching data for GSTIN: 27AABCC5127A2Z8
+2026-01-18 02:52:31,341 - api_client - INFO - Fetching sale export: GSTIN=27AABCC5127A2Z8, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:31,974 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:31,976 - __main__ - ERROR - Error fetching data for GSTIN 27AABCC5127A2Z8: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:31,979 - __main__ - INFO - Fetching data for GSTIN: 24AABCC5127A1ZF
+2026-01-18 02:52:31,980 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A1ZF, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:32,643 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:32,644 - __main__ - ERROR - Error fetching data for GSTIN 24AABCC5127A1ZF: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:32,647 - __main__ - INFO - Fetching data for GSTIN: 24AAGCC7953B1ZU
+2026-01-18 02:52:32,649 - api_client - INFO - Fetching sale export: GSTIN=24AAGCC7953B1ZU, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:33,284 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:33,285 - __main__ - ERROR - Error fetching data for GSTIN 24AAGCC7953B1ZU: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:33,287 - __main__ - INFO - Fetching data for GSTIN: 24AAJFJ1018J1ZL
+2026-01-18 02:52:33,288 - api_client - INFO - Fetching sale export: GSTIN=24AAJFJ1018J1ZL, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:33,940 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:33,942 - __main__ - ERROR - Error fetching data for GSTIN 24AAJFJ1018J1ZL: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:33,944 - __main__ - INFO - Fetching data for GSTIN: 24AMPPB2113G1ZM
+2026-01-18 02:52:33,944 - api_client - INFO - Fetching sale export: GSTIN=24AMPPB2113G1ZM, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:34,559 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:34,561 - __main__ - ERROR - Error fetching data for GSTIN 24AMPPB2113G1ZM: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:34,565 - __main__ - INFO - Fetching data for GSTIN: 24AOLPS9646F1ZF
+2026-01-18 02:52:34,566 - api_client - INFO - Fetching sale export: GSTIN=24AOLPS9646F1ZF, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:35,199 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:35,200 - __main__ - ERROR - Error fetching data for GSTIN 24AOLPS9646F1ZF: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:35,204 - __main__ - INFO - Fetching data for GSTIN: 24AAGCT0879H1Z6
+2026-01-18 02:52:35,204 - api_client - INFO - Fetching sale export: GSTIN=24AAGCT0879H1Z6, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:35,845 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:35,845 - __main__ - ERROR - Error fetching data for GSTIN 24AAGCT0879H1Z6: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:35,847 - __main__ - INFO - Fetching data for GSTIN: 24AATCA1200G1Z5
+2026-01-18 02:52:35,847 - api_client - INFO - Fetching sale export: GSTIN=24AATCA1200G1Z5, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:36,438 - api_client - ERROR - API request failed: 422 Client Error: Unprocessable Entity for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:36,439 - __main__ - ERROR - Error fetching data for GSTIN 24AATCA1200G1Z5: 422 Client Error: Unprocessable Entity for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:36,442 - __main__ - INFO - Fetching data for GSTIN: 24AAKCC8514G1ZP
+2026-01-18 02:52:36,443 - api_client - INFO - Fetching sale export: GSTIN=24AAKCC8514G1ZP, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:37,093 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:37,094 - __main__ - ERROR - Error fetching data for GSTIN 24AAKCC8514G1ZP: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:37,096 - __main__ - INFO - Fetching data for GSTIN: 24AAYFA5141Q1ZT
+2026-01-18 02:52:37,097 - api_client - INFO - Fetching sale export: GSTIN=24AAYFA5141Q1ZT, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:37,765 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:37,766 - __main__ - ERROR - Error fetching data for GSTIN 24AAYFA5141Q1ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:37,770 - __main__ - INFO - Fetching data for GSTIN: 24AABCC5127A2ZE
+2026-01-18 02:52:37,770 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A2ZE, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:38,429 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:38,430 - __main__ - ERROR - Error fetching data for GSTIN 24AABCC5127A2ZE: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:38,433 - __main__ - INFO - Fetching data for GSTIN: 24ADZFS3855R1ZT
+2026-01-18 02:52:38,434 - api_client - INFO - Fetching sale export: GSTIN=24ADZFS3855R1ZT, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:39,072 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:39,072 - __main__ - ERROR - Error fetching data for GSTIN 24ADZFS3855R1ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:39,073 - __main__ - INFO - Fetching data for GSTIN: 24AAICC6455G1ZN
+2026-01-18 02:52:39,073 - api_client - INFO - Fetching sale export: GSTIN=24AAICC6455G1ZN, from=18-01-2026 02:51:14, to=18-01-2026 02:52:27, FY=202526
+2026-01-18 02:52:39,741 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:39,742 - __main__ - ERROR - Error fetching data for GSTIN 24AAICC6455G1ZN: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:52:39,907 - db_connection - INFO - Updated task 1 progress: from=2026-01-18T02:51:14.090377, to=2026-01-18T02:52:27.359799, initial_sync=True
+2026-01-18 02:52:39,999 - __main__ - INFO - Task 1 completed: 0 records, 0 files
+2026-01-18 02:53:39,999 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:53:40,140 - __main__ - INFO - Found 1 active export tasks
+2026-01-18 02:53:40,140 - __main__ - INFO - Running task: Fetch Sales Data (ID: 1)
+2026-01-18 02:53:40,140 - __main__ - INFO - Processing task 1 for subscriber CygnetOne
+2026-01-18 02:53:40,245 - __main__ - INFO - Incremental sync: fetching from 2026-01-18 02:52:27.359799 to 2026-01-18 02:53:40.245023
+2026-01-18 02:53:40,348 - __main__ - INFO - Found 19 entities for subscriber 663
+2026-01-18 02:53:40,349 - __main__ - INFO - Fetching data for GSTIN: 24AAHFC3011G1Z4
+2026-01-18 02:53:40,349 - api_client - INFO - Fetching sale export: GSTIN=24AAHFC3011G1Z4, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:41,034 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:41,035 - __main__ - ERROR - Error fetching data for GSTIN 24AAHFC3011G1Z4: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:41,040 - __main__ - INFO - Fetching data for GSTIN: 27AABCC5127A1Z9
+2026-01-18 02:53:41,041 - api_client - INFO - Fetching sale export: GSTIN=27AABCC5127A1Z9, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:41,725 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:41,726 - __main__ - ERROR - Error fetching data for GSTIN 27AABCC5127A1Z9: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:41,731 - __main__ - INFO - Fetching data for GSTIN: 24AADCC1450E1ZB
+2026-01-18 02:53:41,732 - api_client - INFO - Fetching sale export: GSTIN=24AADCC1450E1ZB, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:42,369 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:42,370 - __main__ - ERROR - Error fetching data for GSTIN 24AADCC1450E1ZB: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:42,376 - __main__ - INFO - Fetching data for GSTIN: 24AAJCM8902B1ZQ
+2026-01-18 02:53:42,378 - api_client - INFO - Fetching sale export: GSTIN=24AAJCM8902B1ZQ, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:43,032 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:43,033 - __main__ - ERROR - Error fetching data for GSTIN 24AAJCM8902B1ZQ: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:43,037 - __main__ - INFO - Fetching data for GSTIN: 24AAIFE2287R2ZT
+2026-01-18 02:53:43,037 - api_client - INFO - Fetching sale export: GSTIN=24AAIFE2287R2ZT, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:43,699 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:43,701 - __main__ - ERROR - Error fetching data for GSTIN 24AAIFE2287R2ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:43,704 - __main__ - INFO - Fetching data for GSTIN: 24AAKCS5705K1Z5
+2026-01-18 02:53:43,704 - api_client - INFO - Fetching sale export: GSTIN=24AAKCS5705K1Z5, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:44,336 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:44,337 - __main__ - ERROR - Error fetching data for GSTIN 24AAKCS5705K1Z5: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:44,343 - __main__ - INFO - Fetching data for GSTIN: 27AABCC5127A2Z8
+2026-01-18 02:53:44,344 - api_client - INFO - Fetching sale export: GSTIN=27AABCC5127A2Z8, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:45,031 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:45,033 - __main__ - ERROR - Error fetching data for GSTIN 27AABCC5127A2Z8: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:45,039 - __main__ - INFO - Fetching data for GSTIN: 24AABCC5127A1ZF
+2026-01-18 02:53:45,041 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A1ZF, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:45,748 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:45,749 - __main__ - ERROR - Error fetching data for GSTIN 24AABCC5127A1ZF: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:45,754 - __main__ - INFO - Fetching data for GSTIN: 24AAGCC7953B1ZU
+2026-01-18 02:53:45,755 - api_client - INFO - Fetching sale export: GSTIN=24AAGCC7953B1ZU, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:46,419 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:46,420 - __main__ - ERROR - Error fetching data for GSTIN 24AAGCC7953B1ZU: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:46,426 - __main__ - INFO - Fetching data for GSTIN: 24AAJFJ1018J1ZL
+2026-01-18 02:53:46,427 - api_client - INFO - Fetching sale export: GSTIN=24AAJFJ1018J1ZL, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:47,087 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:47,088 - __main__ - ERROR - Error fetching data for GSTIN 24AAJFJ1018J1ZL: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:47,092 - __main__ - INFO - Fetching data for GSTIN: 24AMPPB2113G1ZM
+2026-01-18 02:53:47,093 - api_client - INFO - Fetching sale export: GSTIN=24AMPPB2113G1ZM, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:47,767 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:47,768 - __main__ - ERROR - Error fetching data for GSTIN 24AMPPB2113G1ZM: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:47,774 - __main__ - INFO - Fetching data for GSTIN: 24AOLPS9646F1ZF
+2026-01-18 02:53:47,775 - api_client - INFO - Fetching sale export: GSTIN=24AOLPS9646F1ZF, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:48,481 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:48,481 - __main__ - ERROR - Error fetching data for GSTIN 24AOLPS9646F1ZF: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:48,482 - __main__ - INFO - Fetching data for GSTIN: 24AAGCT0879H1Z6
+2026-01-18 02:53:48,483 - api_client - INFO - Fetching sale export: GSTIN=24AAGCT0879H1Z6, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:49,076 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:49,077 - __main__ - ERROR - Error fetching data for GSTIN 24AAGCT0879H1Z6: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:49,086 - __main__ - INFO - Fetching data for GSTIN: 24AATCA1200G1Z5
+2026-01-18 02:53:49,087 - api_client - INFO - Fetching sale export: GSTIN=24AATCA1200G1Z5, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:49,674 - api_client - ERROR - API request failed: 422 Client Error: Unprocessable Entity for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:49,675 - __main__ - ERROR - Error fetching data for GSTIN 24AATCA1200G1Z5: 422 Client Error: Unprocessable Entity for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:49,680 - __main__ - INFO - Fetching data for GSTIN: 24AAKCC8514G1ZP
+2026-01-18 02:53:49,681 - api_client - INFO - Fetching sale export: GSTIN=24AAKCC8514G1ZP, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:50,503 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:50,504 - __main__ - ERROR - Error fetching data for GSTIN 24AAKCC8514G1ZP: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:50,507 - __main__ - INFO - Fetching data for GSTIN: 24AAYFA5141Q1ZT
+2026-01-18 02:53:50,508 - api_client - INFO - Fetching sale export: GSTIN=24AAYFA5141Q1ZT, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:51,286 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:51,286 - __main__ - ERROR - Error fetching data for GSTIN 24AAYFA5141Q1ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:51,287 - __main__ - INFO - Fetching data for GSTIN: 24AABCC5127A2ZE
+2026-01-18 02:53:51,287 - api_client - INFO - Fetching sale export: GSTIN=24AABCC5127A2ZE, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:51,914 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:51,915 - __main__ - ERROR - Error fetching data for GSTIN 24AABCC5127A2ZE: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:51,917 - __main__ - INFO - Fetching data for GSTIN: 24ADZFS3855R1ZT
+2026-01-18 02:53:51,918 - api_client - INFO - Fetching sale export: GSTIN=24ADZFS3855R1ZT, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:53,650 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:53,652 - __main__ - ERROR - Error fetching data for GSTIN 24ADZFS3855R1ZT: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:53,656 - __main__ - INFO - Fetching data for GSTIN: 24AAICC6455G1ZN
+2026-01-18 02:53:53,657 - api_client - INFO - Fetching sale export: GSTIN=24AAICC6455G1ZN, from=18-01-2026 02:52:27, to=18-01-2026 02:53:40, FY=202526
+2026-01-18 02:53:54,293 - api_client - ERROR - API request failed: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:54,295 - __main__ - ERROR - Error fetching data for GSTIN 24AAICC6455G1ZN: 406 Client Error: Not Acceptable for url: https://cygnet-api-cygnettaxindia.cygnet.one/enriched/v0.1/oregular/sale/export
+2026-01-18 02:53:54,439 - db_connection - INFO - Updated task 1 progress: from=2026-01-18T02:52:27.359799, to=2026-01-18T02:53:40.245023, initial_sync=True
+2026-01-18 02:53:54,535 - __main__ - INFO - Task 1 completed: 0 records, 0 files
+2026-01-18 02:54:54,536 - __main__ - INFO - Checking for tasks to run...
+2026-01-18 02:54:54,657 - __main__ - INFO - Found 0 active export tasks
+2026-01-18 02:55:30,932 - __main__ - INFO - Received signal 2, shutting down...
+2026-01-18 02:55:30,932 - __main__ - INFO - Stopping Export Scheduler Service...

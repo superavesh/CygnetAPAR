@@ -29,6 +29,7 @@ const TASK_TYPES = [
   { value: 'sync', label: 'Data Sync', description: 'Synchronize data between systems' },
   { value: 'backup', label: 'Backup', description: 'Create backups of data' },
   { value: 'report', label: 'Report', description: 'Generate scheduled reports' },
+  { value: 'export', label: 'Export', description: 'Export data from API to files' },
   { value: 'custom', label: 'Custom', description: 'Custom task execution' },
 ];
 
@@ -47,6 +48,7 @@ export default function ScheduleForm({
     cronExpression: initialData.cronExpression || '0 * * * *',
     taskType: initialData.taskType || 'sync',
     taskConfig: initialData.taskConfig || {},
+    startDatetime: initialData.startDatetime || '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -88,6 +90,11 @@ export default function ScheduleForm({
 
     if (!formData.taskType) {
       newErrors.taskType = 'Please select a task type';
+    }
+
+    // Validate startDatetime for export tasks
+    if (formData.taskType === 'export' && !formData.startDatetime) {
+      newErrors.startDatetime = 'Start datetime is required for export tasks';
     }
 
     setErrors(newErrors);
@@ -213,6 +220,76 @@ export default function ScheduleForm({
           </p>
         )}
       </div>
+
+      {formData.taskType === 'export' && (
+        <div className="form-group">
+          <label className="form-label">
+            Start DateTime *
+          </label>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <div style={{ flex: 1 }}>
+              <label htmlFor="startDate" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem', display: 'block' }}>
+                From
+              </label>
+              <input
+                type="date"
+                id="startDate"
+                className="form-input"
+                value={formData.startDatetime ? formData.startDatetime.split('T')[0] : ''}
+                onChange={(e) => {
+                  const date = e.target.value;
+                  const time = formData.startDatetime?.split('T')[1] || '00:00';
+                  setFormData(prev => ({ ...prev, startDatetime: date ? `${date}T${time}` : '' }));
+                  if (errors.startDatetime) {
+                    setErrors(prev => ({ ...prev, startDatetime: '' }));
+                  }
+                }}
+                disabled={isLoading}
+              />
+            </div>
+            <div style={{ width: '120px' }}>
+              <label htmlFor="startTime" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem', display: 'block' }}>
+                Time
+              </label>
+              <input
+                type="time"
+                id="startTime"
+                className="form-input"
+                value={formData.startDatetime ? formData.startDatetime.split('T')[1]?.substring(0, 5) || '00:00' : '00:00'}
+                onChange={(e) => {
+                  const time = e.target.value;
+                  const date = formData.startDatetime?.split('T')[0] || '';
+                  if (date) {
+                    setFormData(prev => ({ ...prev, startDatetime: `${date}T${time}` }));
+                  }
+                }}
+                disabled={isLoading || !formData.startDatetime?.split('T')[0]}
+              />
+            </div>
+          </div>
+          <div style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.5rem',
+            marginTop: '0.5rem',
+            padding: '0.75rem',
+            backgroundColor: '#fef3c7',
+            borderRadius: '0.375rem',
+            fontSize: '0.75rem',
+            color: 'var(--text-secondary)',
+          }}>
+            <Info size={14} style={{ flexShrink: 0, marginTop: '0.125rem' }} />
+            <div>
+              <strong>Start DateTime:</strong> The scheduler will first fetch all data from this datetime until now (initial sync), then continue fetching incrementally based on the schedule.
+            </div>
+          </div>
+          {errors.startDatetime && (
+            <p style={{ color: 'var(--error)', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+              {errors.startDatetime}
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="form-group">
         <label htmlFor="cronPreset" className="form-label">

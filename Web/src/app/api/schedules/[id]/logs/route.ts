@@ -2,13 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getMasterPool } from '@/lib/db';
 import { ApiResponse } from '@/types';
 
+interface RouteParams {
+  params: Promise<{ id: string }>;
+}
+
 // GET - Fetch execution logs for a specific task
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   const pool = getMasterPool();
-  const taskId = params.id;
+  const { id: taskId } = await params;
   const { searchParams } = new URL(request.url);
   const limit = parseInt(searchParams.get('limit') || '50');
   const offset = parseInt(searchParams.get('offset') || '0');

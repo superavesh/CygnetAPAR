@@ -29,9 +29,13 @@ export interface ScheduledTask {
   taskName: string;
   taskDescription: string;
   cronExpression: string;
-  taskType: 'sync' | 'backup' | 'report' | 'custom';
+  taskType: 'sync' | 'backup' | 'report' | 'custom' | 'export';
   taskConfig: Record<string, unknown>;
   isActive: boolean;
+  startDatetime: Date | null;
+  lastFromStamp: Date | null;
+  lastToStamp: Date | null;
+  isInitialSyncComplete: boolean;
   lastRunAt: Date | null;
   nextRunAt: Date | null;
   createdAt: Date;
@@ -63,8 +67,9 @@ export interface CreateScheduledTaskRequest {
   taskName: string;
   taskDescription: string;
   cronExpression: string;
-  taskType: 'sync' | 'backup' | 'report' | 'custom';
+  taskType: 'sync' | 'backup' | 'report' | 'custom' | 'export';
   taskConfig?: Record<string, unknown>;
+  startDatetime?: string;
 }
 
 export interface ApiResponse<T = unknown> {

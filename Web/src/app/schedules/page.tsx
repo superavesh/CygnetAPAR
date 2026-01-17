@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Plus,
@@ -12,13 +12,17 @@ import {
   Pause,
   Clock,
   History,
+  RefreshCw,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Modal from '@/components/Modal';
 import ScheduleForm from '@/components/ScheduleForm';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { CreateScheduledTaskRequest } from '@/types';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, isPast } from 'date-fns';
+import cronParser from 'cron-parser';
 
 interface ScheduledTask {
   id: number;
@@ -45,8 +49,29 @@ const TASK_TYPE_LABELS: Record<string, { label: string; color: string }> = {
   sync: { label: 'Sync', color: 'badge-info' },
   backup: { label: 'Backup', color: 'badge-success' },
   report: { label: 'Report', color: 'badge-warning' },
+  export: { label: 'Export', color: 'badge-info' },
   custom: { label: 'Custom', color: 'badge-secondary' },
 };
+
+// Helper function to calculate the next run time from cron expression
+function getNextRunTime(cronExpression: string, storedNextRunAt: string | null): Date | null {
+  try {
+    // If we have a stored next run time and it's in the future, use it
+    if (storedNextRunAt) {
+      const storedDate = new Date(storedNextRunAt);
+      if (!isPast(storedDate)) {
+        return storedDate;
+      }
+    }
+
+    // Otherwise, calculate from cron expression
+    const interval = cronParser.parseExpression(cronExpression);
+    return interval.next().toDate();
+  } catch (error) {
+    console.error('Error parsing cron expression:', error);
+    return null;
+  }
+}
 
 export default function SchedulesPage() {
   const searchParams = useSearchParams();
@@ -63,6 +88,8 @@ export default function SchedulesPage() {
   const [taskLogs, setTaskLogs] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [expandedLogIds, setExpandedLogIds] = useState<Set<number>>(new Set());
 
   const fetchTasks = async () => {
     try {
@@ -107,6 +134,25 @@ export default function SchedulesPage() {
     fetchTasks();
     fetchSubscribers();
   }, [filterSubscriberId]);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchTasks();
+    setIsRefreshing(false);
+    toast.success('Schedules refreshed');
+  };
+
+  const toggleLogExpand = (logId: number) => {
+    setExpandedLogIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(logId)) {
+        newSet.delete(logId);
+      } else {
+        newSet.add(logId);
+      }
+      return newSet;
+    });
+  };
 
   const handleCreate = async (data: CreateScheduledTaskRequest) => {
     setIsSubmitting(true);
@@ -267,10 +313,20 @@ export default function SchedulesPage() {
             }
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
-          <Plus size={16} />
-          Add Schedule
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            className="btn btn-secondary"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            title="Refresh"
+          >
+            <RefreshCw size={16} className={isRefreshing ? 'spinner' : ''} />
+          </button>
+          <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
+            <Plus size={16} />
+            Add Schedule
+          </button>
+        </div>
       </div>
 
       {tasks.length === 0 ? (
@@ -335,19 +391,23 @@ export default function SchedulesPage() {
                       </code>
                     </td>
                     <td>
-                      {task.nextRunAt ? (
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}>
-                            <Clock size={14} color="var(--text-secondary)" />
-                            {formatDistanceToNow(new Date(task.nextRunAt), { addSuffix: true })}
-                          </div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                            {format(new Date(task.nextRunAt), 'MMM d, HH:mm')}
-                          </div>
-                        </div>
-                      ) : (
-                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>-</span>
-                      )}
+                      {(() => {
+                        const nextRun = getNextRunTime(task.cronExpression, task.nextRunAt);
+                        if (nextRun) {
+                          return (
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}>
+                                <Clock size={14} color="var(--text-secondary)" />
+                                {formatDistanceToNow(nextRun, { addSuffix: true })}
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                {format(nextRun, 'MMM d, HH:mm')}
+                              </div>
+                            </div>
+                          );
+                        }
+                        return <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>-</span>;
+                      })()}
                     </td>
                     <td>
                       <span className={`badge ${task.isActive ? 'badge-success' : 'badge-secondary'}`}>
@@ -454,9 +514,10 @@ export default function SchedulesPage() {
           setIsLogsModalOpen(false);
           setSelectedTask(null);
           setTaskLogs([]);
+          setExpandedLogIds(new Set());
         }}
         title={`Execution Logs: ${selectedTask?.taskName}`}
-        size="lg"
+        size="xl"
       >
         {isLoadingLogs ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
@@ -467,42 +528,135 @@ export default function SchedulesPage() {
             No execution logs yet
           </div>
         ) : (
-          <div style={{ maxHeight: '400px', overflow: 'auto' }}>
-            <table className="table">
+          <div style={{ maxHeight: '500px', overflow: 'auto' }}>
+            <table className="table" style={{ tableLayout: 'fixed', width: '100%' }}>
               <thead>
                 <tr>
-                  <th>Started At</th>
-                  <th>Status</th>
-                  <th>Duration</th>
-                  <th>Details</th>
+                  <th style={{ width: '180px' }}>Started At</th>
+                  <th style={{ width: '100px' }}>Status</th>
+                  <th style={{ width: '100px' }}>Duration</th>
+                  <th>Details / Error</th>
                 </tr>
               </thead>
               <tbody>
-                {taskLogs.map((log) => (
-                  <tr key={log.id}>
-                    <td style={{ fontSize: '0.875rem' }}>
-                      {format(new Date(log.startedAt), 'MMM d, yyyy HH:mm:ss')}
-                    </td>
-                    <td>
-                      <span className={`badge ${
-                        log.status === 'success' ? 'badge-success' :
-                        log.status === 'failed' ? 'badge-error' :
-                        'badge-warning'
-                      }`}>
-                        {log.status}
-                      </span>
-                    </td>
-                    <td style={{ fontSize: '0.875rem' }}>
-                      {log.completedAt
-                        ? `${Math.round((new Date(log.completedAt).getTime() - new Date(log.startedAt).getTime()) / 1000)}s`
-                        : '-'
-                      }
-                    </td>
-                    <td style={{ fontSize: '0.75rem', color: log.status === 'failed' ? 'var(--error)' : 'var(--text-secondary)' }}>
-                      {log.errorMessage || '-'}
-                    </td>
-                  </tr>
-                ))}
+                {taskLogs.map((log) => {
+                  const isExpanded = expandedLogIds.has(log.id);
+                  const errorMsg = log.errorMessage || '';
+                  const hasLongError = errorMsg.length > 100;
+                  const displayError = hasLongError && !isExpanded
+                    ? errorMsg.substring(0, 100) + '...'
+                    : errorMsg;
+
+                  // Parse execution details
+                  const details = log.executionDetails || {};
+                  const hasDetails = Object.keys(details).length > 0;
+
+                  return (
+                    <tr key={log.id} style={{ verticalAlign: 'top' }}>
+                      <td style={{ fontSize: '0.875rem' }}>
+                        {format(new Date(log.startedAt), 'MMM d, yyyy HH:mm:ss')}
+                        {log.completedAt && (
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                            Completed: {format(new Date(log.completedAt), 'HH:mm:ss')}
+                          </div>
+                        )}
+                      </td>
+                      <td>
+                        <span className={`badge ${
+                          log.status === 'success' ? 'badge-success' :
+                          log.status === 'failed' ? 'badge-error' :
+                          'badge-warning'
+                        }`}>
+                          {log.status}
+                        </span>
+                      </td>
+                      <td style={{ fontSize: '0.875rem' }}>
+                        {log.completedAt
+                          ? `${Math.round((new Date(log.completedAt).getTime() - new Date(log.startedAt).getTime()) / 1000)}s`
+                          : 'Running...'
+                        }
+                      </td>
+                      <td style={{ fontSize: '0.8rem' }}>
+                        {/* Error Message */}
+                        {errorMsg && (
+                          <div style={{
+                            backgroundColor: '#fef2f2',
+                            border: '1px solid #fecaca',
+                            borderRadius: '0.375rem',
+                            padding: '0.5rem',
+                            marginBottom: hasDetails ? '0.5rem' : 0,
+                            color: 'var(--error)',
+                            wordBreak: 'break-word',
+                          }}>
+                            <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>Error:</div>
+                            <div style={{ whiteSpace: isExpanded ? 'pre-wrap' : 'normal' }}>
+                              {displayError}
+                            </div>
+                            {hasLongError && (
+                              <button
+                                onClick={() => toggleLogExpand(log.id)}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: 'var(--primary)',
+                                  cursor: 'pointer',
+                                  padding: '0.25rem 0',
+                                  fontSize: '0.75rem',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '0.25rem',
+                                  marginTop: '0.25rem',
+                                }}
+                              >
+                                {isExpanded ? (
+                                  <>
+                                    <ChevronUp size={12} /> Show less
+                                  </>
+                                ) : (
+                                  <>
+                                    <ChevronDown size={12} /> Show more
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Execution Details */}
+                        {hasDetails && (
+                          <div style={{
+                            backgroundColor: '#f0f9ff',
+                            border: '1px solid #bae6fd',
+                            borderRadius: '0.375rem',
+                            padding: '0.5rem',
+                            color: 'var(--text-secondary)',
+                          }}>
+                            <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
+                              Details:
+                            </div>
+                            {details.total_records !== undefined && (
+                              <div>Records: {details.total_records}</div>
+                            )}
+                            {details.files_created && details.files_created.length > 0 && (
+                              <div>Files: {details.files_created.length}</div>
+                            )}
+                            {details.from_stamp && (
+                              <div>From: {details.from_stamp}</div>
+                            )}
+                            {details.to_stamp && (
+                              <div>To: {details.to_stamp}</div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* No error and no details */}
+                        {!errorMsg && !hasDetails && (
+                          <span style={{ color: 'var(--text-secondary)' }}>-</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

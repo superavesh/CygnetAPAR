@@ -245,6 +245,22 @@ a {
   overflow-y: auto;
 }
 
+.modal.max-w-sm {
+  max-width: 24rem;
+}
+
+.modal.max-w-lg {
+  max-width: 32rem;
+}
+
+.modal.max-w-2xl {
+  max-width: 42rem;
+}
+
+.modal.max-w-4xl {
+  max-width: 56rem;
+}
+
 .modal-header {
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--border);

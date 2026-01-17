@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMasterPool, getAdminPool, getTenantPool } from '@/lib/db';
 import { initializeTenantDatabase } from '@/lib/init-schema';
+import { syncEntitiesForSubscriber } from '@/lib/entity-service';
 import { CreateSubscriberRequest, ApiResponse, Subscriber } from '@/types';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -105,61 +106,83 @@ export async function POST(request: NextRequest) {
         [body.subscriberName, body.subscriberId, body.subscriberURL, body.subscriberUsername, hashedPassword, authToken]
       );
 
-      // Create tenant database name
-      const tenantDbName = `Tenant_${body.subscriberId}`;
-      const tenantDbUser = `tenant_${body.subscriberId.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
-      const tenantDbPassword = uuidv4();
+      // Get admin credentials from env
+      const tenantDbUser = process.env.PG_ADMIN_USER || 'postgres';
+      const tenantDbPassword = process.env.PG_ADMIN_PASSWORD || '';
+      const tenantDbHost = process.env.MASTER_DB_HOST || 'localhost';
+      const tenantDbPort = parseInt(process.env.MASTER_DB_PORT || '5432');
 
-      // Create the tenant database
-      const adminClient = await adminPool.connect();
-      try {
-        // Create database
-        await adminClient.query(`CREATE DATABASE "${tenantDbName}"`);
-
-        // Create user for tenant
-        await adminClient.query(
-          `CREATE USER ${tenantDbUser} WITH PASSWORD '${tenantDbPassword}'`
-        );
-
-        // Grant privileges
-        await adminClient.query(
-          `GRANT ALL PRIVILEGES ON DATABASE "${tenantDbName}" TO ${tenantDbUser}`
-        );
-      } finally {
-        adminClient.release();
-      }
-
-      // Insert tenant record
-      await client.query(
+      // Insert tenant record first to get the ID (with placeholder database name)
+      const tenantResult = await client.query(
         `INSERT INTO tenants (subscriber_id, database_name, db_host, db_port, db_user, db_password)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
+         VALUES ($1, $2, $3, $4, $5, $6)
+         RETURNING id`,
         [
           body.subscriberId,
-          tenantDbName,
-          process.env.MASTER_DB_HOST || 'localhost',
-          parseInt(process.env.MASTER_DB_PORT || '5432'),
+          'placeholder', // Temporary placeholder
+          tenantDbHost,
+          tenantDbPort,
           tenantDbUser,
           tenantDbPassword,
         ]
       );
 
+      // Create tenant database name using the tenant ID: {id}_CygnetAPARTenant_{subscriberId}
+      const tenantId = tenantResult.rows[0].id;
+      const tenantDbName = `${tenantId}_CygnetAPARTenant_${body.subscriberId}`;
+
+      // Update tenant record with actual database name
+      await client.query(
+        `UPDATE tenants SET database_name = $1 WHERE id = $2`,
+        [tenantDbName, tenantId]
+      );
+
+      // Create the tenant database
+      const adminClient = await adminPool.connect();
+      try {
+        // Create database only (using existing admin user)
+        await adminClient.query(`CREATE DATABASE "${tenantDbName}"`);
+      } finally {
+        adminClient.release();
+      }
+
       await client.query('COMMIT');
 
       // Initialize tenant database schema
       const tenantPool = getTenantPool(
-        process.env.MASTER_DB_HOST || 'localhost',
-        parseInt(process.env.MASTER_DB_PORT || '5432'),
+        tenantDbHost,
+        tenantDbPort,
         tenantDbName,
         tenantDbUser,
         tenantDbPassword
       );
       await initializeTenantDatabase(tenantPool, body.subscriberId);
 
+      // Fetch and sync entities from external API
+      let entitySyncResult = { totalFetched: 0, totalInserted: 0 };
+      let entitySyncError: string | null = null;
+
+      try {
+        console.log(`Syncing entities for subscriber ${body.subscriberId}...`);
+        entitySyncResult = await syncEntitiesForSubscriber(
+          body.subscriberURL,
+          authToken,
+          tenantPool
+        );
+        console.log(`Entity sync completed: ${entitySyncResult.totalFetched} fetched, ${entitySyncResult.totalInserted} inserted`);
+      } catch (syncError) {
+        console.error('Error syncing entities:', syncError);
+        entitySyncError = (syncError as Error).message;
+        // Don't fail the subscriber creation if entity sync fails
+      }
+
       const subscriber = subscriberResult.rows[0];
 
       return NextResponse.json<ApiResponse>({
         success: true,
-        message: 'Subscriber created successfully with tenant database',
+        message: entitySyncError
+          ? `Subscriber created successfully with tenant database. Entity sync failed: ${entitySyncError}`
+          : 'Subscriber created successfully with tenant database and entities synced',
         data: {
           id: subscriber.id,
           subscriberName: subscriber.subscriber_name,
@@ -168,6 +191,9 @@ export async function POST(request: NextRequest) {
           subscriberUsername: subscriber.subscriber_username,
           subscriberAuthToken: subscriber.subscriber_auth_token,
           tenantDatabase: tenantDbName,
+          entitiesFetched: entitySyncResult.totalFetched,
+          entitiesInserted: entitySyncResult.totalInserted,
+          entitySyncError,
           createdAt: subscriber.created_at,
         },
       });

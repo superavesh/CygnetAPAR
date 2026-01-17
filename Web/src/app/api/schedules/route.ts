@@ -20,6 +20,10 @@ export async function GET(request: NextRequest) {
         st.task_type,
         st.task_config,
         st.is_active,
+        st.start_datetime,
+        st.last_from_stamp,
+        st.last_to_stamp,
+        st.is_initial_sync_complete,
         st.last_run_at,
         st.next_run_at,
         st.created_at,
@@ -49,6 +53,10 @@ export async function GET(request: NextRequest) {
       taskType: row.task_type,
       taskConfig: row.task_config,
       isActive: row.is_active,
+      startDatetime: row.start_datetime,
+      lastFromStamp: row.last_from_stamp,
+      lastToStamp: row.last_to_stamp,
+      isInitialSyncComplete: row.is_initial_sync_complete,
       lastRunAt: row.last_run_at,
       nextRunAt: row.next_run_at,
       createdAt: row.created_at,
@@ -99,7 +107,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate task type
-    const validTaskTypes = ['sync', 'backup', 'report', 'custom'];
+    const validTaskTypes = ['sync', 'backup', 'report', 'custom', 'export'];
     if (!validTaskTypes.includes(body.taskType)) {
       return NextResponse.json<ApiResponse>(
         { success: false, error: `Invalid task type. Must be one of: ${validTaskTypes.join(', ')}` },
@@ -120,11 +128,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Parse start datetime if provided
+    let startDatetime = null;
+    if (body.startDatetime) {
+      startDatetime = new Date(body.startDatetime);
+    }
+
     // Insert scheduled task
     const result = await pool.query(
       `INSERT INTO scheduled_tasks
-       (subscriber_id, task_name, task_description, cron_expression, task_type, task_config, next_run_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       (subscriber_id, task_name, task_description, cron_expression, task_type, task_config, next_run_at, start_datetime)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
       [
         body.subscriberId,
@@ -134,6 +148,7 @@ export async function POST(request: NextRequest) {
         body.taskType,
         JSON.stringify(body.taskConfig || {}),
         nextRunAt,
+        startDatetime,
       ]
     );
 
@@ -151,6 +166,8 @@ export async function POST(request: NextRequest) {
         taskType: row.task_type,
         taskConfig: row.task_config,
         isActive: row.is_active,
+        startDatetime: row.start_datetime,
+        isInitialSyncComplete: row.is_initial_sync_complete,
         nextRunAt: row.next_run_at,
         createdAt: row.created_at,
       },

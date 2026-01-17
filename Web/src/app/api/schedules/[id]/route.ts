@@ -3,13 +3,17 @@ import { getMasterPool } from '@/lib/db';
 import { ApiResponse } from '@/types';
 import { parseExpression } from 'cron-parser';
 
+interface RouteParams {
+  params: Promise<{ id: string }>;
+}
+
 // GET - Fetch a specific scheduled task
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   const pool = getMasterPool();
-  const taskId = params.id;
+  const { id: taskId } = await params;
 
   try {
     const result = await pool.query(
@@ -22,6 +26,10 @@ export async function GET(
         st.task_type,
         st.task_config,
         st.is_active,
+        st.start_datetime,
+        st.last_from_stamp,
+        st.last_to_stamp,
+        st.is_initial_sync_complete,
         st.last_run_at,
         st.next_run_at,
         st.created_at,
@@ -51,6 +59,10 @@ export async function GET(
       taskType: row.task_type,
       taskConfig: row.task_config,
       isActive: row.is_active,
+      startDatetime: row.start_datetime,
+      lastFromStamp: row.last_from_stamp,
+      lastToStamp: row.last_to_stamp,
+      isInitialSyncComplete: row.is_initial_sync_complete,
       lastRunAt: row.last_run_at,
       nextRunAt: row.next_run_at,
       createdAt: row.created_at,
@@ -73,10 +85,10 @@ export async function GET(
 // PUT - Update a scheduled task
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   const pool = getMasterPool();
-  const taskId = params.id;
+  const { id: taskId } = await params;
 
   try {
     const body = await request.json();
@@ -111,7 +123,7 @@ export async function PUT(
       }
     }
     if (body.taskType) {
-      const validTaskTypes = ['sync', 'backup', 'report', 'custom'];
+      const validTaskTypes = ['sync', 'backup', 'report', 'custom', 'export'];
       if (!validTaskTypes.includes(body.taskType)) {
         return NextResponse.json<ApiResponse>(
           { success: false, error: `Invalid task type. Must be one of: ${validTaskTypes.join(', ')}` },
@@ -128,6 +140,10 @@ export async function PUT(
     if (body.isActive !== undefined) {
       updateFields.push(`is_active = $${paramIndex++}`);
       values.push(body.isActive);
+    }
+    if (body.startDatetime !== undefined) {
+      updateFields.push(`start_datetime = $${paramIndex++}`);
+      values.push(body.startDatetime ? new Date(body.startDatetime) : null);
     }
 
     if (updateFields.length === 0) {
@@ -167,6 +183,10 @@ export async function PUT(
         taskType: row.task_type,
         taskConfig: row.task_config,
         isActive: row.is_active,
+        startDatetime: row.start_datetime,
+        lastFromStamp: row.last_from_stamp,
+        lastToStamp: row.last_to_stamp,
+        isInitialSyncComplete: row.is_initial_sync_complete,
         nextRunAt: row.next_run_at,
         updatedAt: row.updated_at,
       },
@@ -183,10 +203,10 @@ export async function PUT(
 // DELETE - Delete a scheduled task
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   const pool = getMasterPool();
-  const taskId = params.id;
+  const { id: taskId } = await params;
 
   try {
     const result = await pool.query(

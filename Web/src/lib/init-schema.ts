@@ -36,9 +36,13 @@ CREATE TABLE IF NOT EXISTS scheduled_tasks (
   task_name VARCHAR(255) NOT NULL,
   task_description TEXT,
   cron_expression VARCHAR(100) NOT NULL,
-  task_type VARCHAR(50) NOT NULL CHECK (task_type IN ('sync', 'backup', 'report', 'custom')),
+  task_type VARCHAR(50) NOT NULL CHECK (task_type IN ('sync', 'backup', 'report', 'custom', 'export')),
   task_config JSONB DEFAULT '{}',
   is_active BOOLEAN DEFAULT true,
+  start_datetime TIMESTAMP WITH TIME ZONE,
+  last_from_stamp TIMESTAMP WITH TIME ZONE,
+  last_to_stamp TIMESTAMP WITH TIME ZONE,
+  is_initial_sync_complete BOOLEAN DEFAULT false,
   last_run_at TIMESTAMP WITH TIME ZONE,
   next_run_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -104,7 +108,39 @@ CREATE TABLE IF NOT EXISTS tenant_info (
   initialized_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Example: Add more tenant-specific tables as needed
+-- Entities table: stores entity data fetched from external API
+CREATE TABLE IF NOT EXISTS entities (
+  id SERIAL PRIMARY KEY,
+  entity_id VARCHAR(100) UNIQUE,
+  legal_name VARCHAR(500),
+  trade_name VARCHAR(500),
+  gstin VARCHAR(20),
+  pan VARCHAR(20),
+  entity_type VARCHAR(100),
+  registration_status VARCHAR(100),
+  state_code VARCHAR(10),
+  state_name VARCHAR(100),
+  address TEXT,
+  pincode VARCHAR(10),
+  email VARCHAR(255),
+  phone VARCHAR(50),
+  constitution_of_business VARCHAR(255),
+  taxpayer_type VARCHAR(100),
+  registration_date DATE,
+  cancellation_date DATE,
+  last_updated_date DATE,
+  raw_data JSONB DEFAULT '{}',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create index on commonly searched fields
+CREATE INDEX IF NOT EXISTS idx_entities_gstin ON entities(gstin);
+CREATE INDEX IF NOT EXISTS idx_entities_pan ON entities(pan);
+CREATE INDEX IF NOT EXISTS idx_entities_legal_name ON entities(legal_name);
+CREATE INDEX IF NOT EXISTS idx_entities_entity_id ON entities(entity_id);
+
+-- Tenant settings table
 CREATE TABLE IF NOT EXISTS tenant_settings (
   id SERIAL PRIMARY KEY,
   setting_key VARCHAR(100) UNIQUE NOT NULL,
@@ -120,6 +156,21 @@ CREATE TABLE IF NOT EXISTS tenant_logs (
   log_data JSONB DEFAULT '{}',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Trigger for entities updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = CURRENT_TIMESTAMP;
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+DROP TRIGGER IF EXISTS update_entities_updated_at ON entities;
+CREATE TRIGGER update_entities_updated_at
+  BEFORE UPDATE ON entities
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
 `;
 
 export async function initializeMasterDatabase(pool: Pool): Promise<void> {
