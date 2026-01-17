@@ -1,0 +1,42 @@
+{
+  "name": "apar-client-manager",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:init": "ts-node scripts/init-database.ts"
+  },
+  "dependencies": {
+    "next": "14.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "pg": "^8.11.3",
+    "bcryptjs": "^2.4.3",
+    "node-cron": "^3.0.3",
+    "cron-parser": "^4.9.0",
+    "uuid": "^9.0.1",
+    "date-fns": "^3.3.1",
+    "react-hot-toast": "^2.4.1",
+    "lucide-react": "^0.344.0",
+    "tailwindcss": "^3.4.1",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
+    "dotenv": "^16.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@types/pg": "^8.11.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node-cron": "^3.0.11",
+    "@types/uuid": "^9.0.8",
+    "typescript": "^5.3.0",
+    "ts-node": "^10.9.2",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "14.2.0"
+  }
+}

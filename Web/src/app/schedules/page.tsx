@@ -1,0 +1,528 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Loader2,
+  Calendar,
+  Play,
+  Pause,
+  Clock,
+  History,
+} from 'lucide-react';
+import toast from 'react-hot-toast';
+import Modal from '@/components/Modal';
+import ScheduleForm from '@/components/ScheduleForm';
+import ConfirmDialog from '@/components/ConfirmDialog';
+import { CreateScheduledTaskRequest } from '@/types';
+import { format, formatDistanceToNow } from 'date-fns';
+
+interface ScheduledTask {
+  id: number;
+  subscriberId: string;
+  subscriberName: string;
+  taskName: string;
+  taskDescription: string;
+  cronExpression: string;
+  taskType: string;
+  taskConfig: Record<string, unknown>;
+  isActive: boolean;
+  lastRunAt: string | null;
+  nextRunAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Subscriber {
+  subscriberId: string;
+  subscriberName: string;
+}
+
+const TASK_TYPE_LABELS: Record<string, { label: string; color: string }> = {
+  sync: { label: 'Sync', color: 'badge-info' },
+  backup: { label: 'Backup', color: 'badge-success' },
+  report: { label: 'Report', color: 'badge-warning' },
+  custom: { label: 'Custom', color: 'badge-secondary' },
+};
+
+export default function SchedulesPage() {
+  const searchParams = useSearchParams();
+  const filterSubscriberId = searchParams.get('subscriberId');
+
+  const [tasks, setTasks] = useState<ScheduledTask[]>([]);
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<ScheduledTask | null>(null);
+  const [taskLogs, setTaskLogs] = useState<any[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
+
+  const fetchTasks = async () => {
+    try {
+      let url = '/api/schedules';
+      if (filterSubscriberId) {
+        url += `?subscriberId=${filterSubscriberId}`;
+      }
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.success) {
+        setTasks(data.data);
+      } else {
+        toast.error(data.error || 'Failed to fetch schedules');
+      }
+    } catch (error) {
+      console.error('Error fetching schedules:', error);
+      toast.error('Failed to fetch schedules');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchSubscribers = async () => {
+    try {
+      const response = await fetch('/api/subscribers');
+      const data = await response.json();
+
+      if (data.success) {
+        setSubscribers(data.data.map((s: any) => ({
+          subscriberId: s.subscriberId,
+          subscriberName: s.subscriberName,
+        })));
+      }
+    } catch (error) {
+      console.error('Error fetching subscribers:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+    fetchSubscribers();
+  }, [filterSubscriberId]);
+
+  const handleCreate = async (data: CreateScheduledTaskRequest) => {
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('/api/schedules', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success('Schedule created successfully');
+        setIsCreateModalOpen(false);
+        fetchTasks();
+      } else {
+        toast.error(result.error || 'Failed to create schedule');
+      }
+    } catch (error) {
+      console.error('Error creating schedule:', error);
+      toast.error('Failed to create schedule');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdate = async (data: CreateScheduledTaskRequest) => {
+    if (!selectedTask) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`/api/schedules/${selectedTask.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success('Schedule updated successfully');
+        setIsEditModalOpen(false);
+        setSelectedTask(null);
+        fetchTasks();
+      } else {
+        toast.error(result.error || 'Failed to update schedule');
+      }
+    } catch (error) {
+      console.error('Error updating schedule:', error);
+      toast.error('Failed to update schedule');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedTask) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`/api/schedules/${selectedTask.id}`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success('Schedule deleted successfully');
+        setIsDeleteDialogOpen(false);
+        setSelectedTask(null);
+        fetchTasks();
+      } else {
+        toast.error(result.error || 'Failed to delete schedule');
+      }
+    } catch (error) {
+      console.error('Error deleting schedule:', error);
+      toast.error('Failed to delete schedule');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleToggleActive = async (task: ScheduledTask) => {
+    try {
+      const response = await fetch(`/api/schedules/${task.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: !task.isActive }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success(`Schedule ${task.isActive ? 'paused' : 'activated'}`);
+        fetchTasks();
+      } else {
+        toast.error(result.error || 'Failed to update schedule');
+      }
+    } catch (error) {
+      console.error('Error toggling schedule:', error);
+      toast.error('Failed to update schedule');
+    }
+  };
+
+  const fetchLogs = async (taskId: number) => {
+    setIsLoadingLogs(true);
+    try {
+      const response = await fetch(`/api/schedules/${taskId}/logs`);
+      const data = await response.json();
+
+      if (data.success) {
+        setTaskLogs(data.data.logs);
+      }
+    } catch (error) {
+      console.error('Error fetching logs:', error);
+      toast.error('Failed to fetch logs');
+    } finally {
+      setIsLoadingLogs(false);
+    }
+  };
+
+  const openLogsModal = (task: ScheduledTask) => {
+    setSelectedTask(task);
+    setIsLogsModalOpen(true);
+    fetchLogs(task.id);
+  };
+
+  const openEditModal = (task: ScheduledTask) => {
+    setSelectedTask(task);
+    setIsEditModalOpen(true);
+  };
+
+  const openDeleteDialog = (task: ScheduledTask) => {
+    setSelectedTask(task);
+    setIsDeleteDialogOpen(true);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="page-container">
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+          <Loader2 size={32} className="spinner" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="page-container">
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Scheduled Tasks</h1>
+          <p className="page-description">
+            {filterSubscriberId
+              ? `Showing schedules for: ${subscribers.find(s => s.subscriberId === filterSubscriberId)?.subscriberName || filterSubscriberId}`
+              : 'Manage automated tasks for your clients'
+            }
+          </p>
+        </div>
+        <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
+          <Plus size={16} />
+          Add Schedule
+        </button>
+      </div>
+
+      {tasks.length === 0 ? (
+        <div className="card">
+          <div className="empty-state">
+            <Calendar size={64} className="empty-state-icon" />
+            <h3 className="empty-state-title">No scheduled tasks yet</h3>
+            <p className="empty-state-description">
+              Create automated tasks for your clients like data sync, backups, or reports.
+            </p>
+            <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
+              <Plus size={16} />
+              Create Your First Schedule
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="card">
+          <div style={{ overflowX: 'auto' }}>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Task Name</th>
+                  <th>Client</th>
+                  <th>Type</th>
+                  <th>Schedule</th>
+                  <th>Next Run</th>
+                  <th>Status</th>
+                  <th style={{ width: '180px' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tasks.map((task) => (
+                  <tr key={task.id}>
+                    <td>
+                      <div style={{ fontWeight: 500 }}>{task.taskName}</div>
+                      {task.taskDescription && (
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                          {task.taskDescription.length > 50
+                            ? `${task.taskDescription.substring(0, 50)}...`
+                            : task.taskDescription
+                          }
+                        </div>
+                      )}
+                    </td>
+                    <td>
+                      <span style={{ fontSize: '0.875rem' }}>{task.subscriberName}</span>
+                    </td>
+                    <td>
+                      <span className={`badge ${TASK_TYPE_LABELS[task.taskType]?.color || 'badge-secondary'}`}>
+                        {TASK_TYPE_LABELS[task.taskType]?.label || task.taskType}
+                      </span>
+                    </td>
+                    <td>
+                      <code style={{
+                        backgroundColor: 'var(--background)',
+                        padding: '0.125rem 0.375rem',
+                        borderRadius: '0.25rem',
+                        fontSize: '0.75rem',
+                      }}>
+                        {task.cronExpression}
+                      </code>
+                    </td>
+                    <td>
+                      {task.nextRunAt ? (
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}>
+                            <Clock size={14} color="var(--text-secondary)" />
+                            {formatDistanceToNow(new Date(task.nextRunAt), { addSuffix: true })}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                            {format(new Date(task.nextRunAt), 'MMM d, HH:mm')}
+                          </div>
+                        </div>
+                      ) : (
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>-</span>
+                      )}
+                    </td>
+                    <td>
+                      <span className={`badge ${task.isActive ? 'badge-success' : 'badge-secondary'}`}>
+                        {task.isActive ? 'Active' : 'Paused'}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button
+                          className={`btn ${task.isActive ? 'btn-secondary' : 'btn-success'}`}
+                          style={{ padding: '0.375rem 0.5rem' }}
+                          onClick={() => handleToggleActive(task)}
+                          title={task.isActive ? 'Pause' : 'Activate'}
+                        >
+                          {task.isActive ? <Pause size={14} /> : <Play size={14} />}
+                        </button>
+                        <button
+                          className="btn btn-secondary"
+                          style={{ padding: '0.375rem 0.5rem' }}
+                          onClick={() => openLogsModal(task)}
+                          title="View Logs"
+                        >
+                          <History size={14} />
+                        </button>
+                        <button
+                          className="btn btn-secondary"
+                          style={{ padding: '0.375rem 0.5rem' }}
+                          onClick={() => openEditModal(task)}
+                          title="Edit"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button
+                          className="btn btn-danger"
+                          style={{ padding: '0.375rem 0.5rem' }}
+                          onClick={() => openDeleteDialog(task)}
+                          title="Delete"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Create Modal */}
+      <Modal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        title="Create Schedule"
+        size="lg"
+      >
+        <ScheduleForm
+          onSubmit={handleCreate}
+          onCancel={() => setIsCreateModalOpen(false)}
+          isLoading={isSubmitting}
+          subscribers={subscribers}
+          mode="create"
+          initialData={filterSubscriberId ? { subscriberId: filterSubscriberId } : undefined}
+        />
+      </Modal>
+
+      {/* Edit Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedTask(null);
+        }}
+        title="Edit Schedule"
+        size="lg"
+      >
+        {selectedTask && (
+          <ScheduleForm
+            onSubmit={handleUpdate}
+            onCancel={() => {
+              setIsEditModalOpen(false);
+              setSelectedTask(null);
+            }}
+            isLoading={isSubmitting}
+            subscribers={subscribers}
+            mode="edit"
+            initialData={{
+              subscriberId: selectedTask.subscriberId,
+              taskName: selectedTask.taskName,
+              taskDescription: selectedTask.taskDescription,
+              cronExpression: selectedTask.cronExpression,
+              taskType: selectedTask.taskType as 'sync' | 'backup' | 'report' | 'custom',
+              taskConfig: selectedTask.taskConfig,
+            }}
+          />
+        )}
+      </Modal>
+
+      {/* Logs Modal */}
+      <Modal
+        isOpen={isLogsModalOpen}
+        onClose={() => {
+          setIsLogsModalOpen(false);
+          setSelectedTask(null);
+          setTaskLogs([]);
+        }}
+        title={`Execution Logs: ${selectedTask?.taskName}`}
+        size="lg"
+      >
+        {isLoadingLogs ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+            <Loader2 size={24} className="spinner" />
+          </div>
+        ) : taskLogs.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
+            No execution logs yet
+          </div>
+        ) : (
+          <div style={{ maxHeight: '400px', overflow: 'auto' }}>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Started At</th>
+                  <th>Status</th>
+                  <th>Duration</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                {taskLogs.map((log) => (
+                  <tr key={log.id}>
+                    <td style={{ fontSize: '0.875rem' }}>
+                      {format(new Date(log.startedAt), 'MMM d, yyyy HH:mm:ss')}
+                    </td>
+                    <td>
+                      <span className={`badge ${
+                        log.status === 'success' ? 'badge-success' :
+                        log.status === 'failed' ? 'badge-error' :
+                        'badge-warning'
+                      }`}>
+                        {log.status}
+                      </span>
+                    </td>
+                    <td style={{ fontSize: '0.875rem' }}>
+                      {log.completedAt
+                        ? `${Math.round((new Date(log.completedAt).getTime() - new Date(log.startedAt).getTime()) / 1000)}s`
+                        : '-'
+                      }
+                    </td>
+                    <td style={{ fontSize: '0.75rem', color: log.status === 'failed' ? 'var(--error)' : 'var(--text-secondary)' }}>
+                      {log.errorMessage || '-'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Modal>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => {
+          setIsDeleteDialogOpen(false);
+          setSelectedTask(null);
+        }}
+        onConfirm={handleDelete}
+        title="Delete Schedule"
+        message={`Are you sure you want to delete the schedule "${selectedTask?.taskName}"?`}
+        confirmText="Delete"
+        isLoading={isSubmitting}
+        variant="danger"
+      />
+    </div>
+  );
+}
