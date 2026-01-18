@@ -14,9 +14,11 @@ from db_connection import (
     get_entities_for_subscriber,
     update_task_progress,
     log_task_execution,
-    update_task_execution_log
+    update_task_execution_log,
+    ensure_transaction_logs_table,
+    log_api_transaction
 )
-from api_client import ExportApiClient, save_export_data
+from api_client import ExportApiClient, save_export_data, MODULE_ENDPOINTS, ApiTransactionInfo
 
 # Configure logging
 logging.basicConfig(
@@ -78,6 +80,76 @@ class ExportScheduler:
 
         return False
 
+    def _get_module_from_config(self, task_config: Dict[str, Any]) -> str:
+        """
+        Get the module to process from task config
+
+        Args:
+            task_config: Task configuration dictionary
+
+        Returns:
+            Module name to process (single module per scheduler)
+        """
+        if not task_config:
+            return 'sale'  # Default to sale if no config
+
+        # Support both 'module' (new single module format) and 'modules' (legacy list format)
+        module = task_config.get('module')
+        if module and module in MODULE_ENDPOINTS:
+            return module
+
+        # Legacy support: if 'modules' array exists, use first valid module
+        modules = task_config.get('modules', [])
+        if modules:
+            valid_modules = [m for m in modules if m in MODULE_ENDPOINTS]
+            if valid_modules:
+                return valid_modules[0]
+
+        return 'sale'  # Default fallback
+
+    def _log_transactions(self, transactions: List[ApiTransactionInfo],
+                          db_name: str, db_host: str, db_port: int,
+                          db_user: str, db_password: str,
+                          gstin: str, from_stamp: datetime, to_stamp: datetime,
+                          file_path: str = None) -> None:
+        """
+        Log API transactions to tenant database
+
+        Args:
+            transactions: List of API transaction info objects
+            db_name: Tenant database name
+            db_host: Database host
+            db_port: Database port
+            db_user: Database user
+            db_password: Database password
+            gstin: GSTIN of the location
+            from_stamp: Start datetime
+            to_stamp: End datetime
+            file_path: Path to saved response file
+        """
+        for trans in transactions:
+            transaction_data = {
+                'module': trans.module,
+                'request_url': trans.request_url,
+                'request_method': trans.request_method,
+                'request_headers': trans.request_headers,
+                'request_body': trans.request_body,
+                'response_status_code': trans.response_status_code,
+                'response_headers': trans.response_headers,
+                'response_file_path': file_path,
+                'gstin': gstin,
+                'from_stamp': from_stamp,
+                'to_stamp': to_stamp,
+                'execution_time_ms': trans.execution_time_ms,
+                'is_success': trans.is_success,
+                'error_message': trans.error_message
+            }
+
+            try:
+                log_api_transaction(db_name, db_host, db_port, db_user, db_password, transaction_data)
+            except Exception as e:
+                logger.error(f"Failed to log transaction: {e}")
+
     def process_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
         """
         Process a single export task
@@ -107,7 +179,19 @@ class ExportScheduler:
         last_to_stamp = task['last_to_stamp']
         is_initial_sync_complete = task['is_initial_sync_complete']
 
+        # Get task config for modules
+        task_config = task.get('task_config', {})
+        if isinstance(task_config, str):
+            import json
+            try:
+                task_config = json.loads(task_config)
+            except:
+                task_config = {}
+
+        module = self._get_module_from_config(task_config)
+
         logger.info(f"Processing task {task_id} for subscriber {subscriber_name}")
+        logger.info(f"Module to process: {module}")
 
         # Log execution start
         log_id = log_task_execution(task_id, subscriber_id, 'running')
@@ -115,12 +199,16 @@ class ExportScheduler:
         result = {
             'task_id': task_id,
             'subscriber_id': subscriber_id,
+            'module': module,
             'files_created': [],
             'total_records': 0,
             'errors': []
         }
 
         try:
+            # Ensure transaction_logs table exists in tenant database
+            ensure_transaction_logs_table(db_name, db_host, db_port, db_user, db_password)
+
             # Determine time range for this run
             current_time = datetime.now()
 
@@ -156,6 +244,9 @@ class ExportScheduler:
                 # Initialize API client
                 api_client = ExportApiClient(subscriber_url, auth_token)
 
+                # Process the configured module
+                logger.info(f"Processing module: {module}")
+
                 # Fetch data for each GSTIN
                 for entity in entities:
                     gstin = entity['gstin']
@@ -163,26 +254,33 @@ class ExportScheduler:
                         continue
 
                     try:
-                        logger.info(f"Fetching data for GSTIN: {gstin}")
+                        logger.info(f"Fetching {module} data for GSTIN: {gstin}")
 
-                        # Fetch all records for this GSTIN
-                        records = api_client.fetch_all_sale_export(
-                            gstin, from_stamp, to_stamp
+                        # Fetch all records for this GSTIN and module
+                        records, transactions = api_client.fetch_all_module_export(
+                            module, gstin, from_stamp, to_stamp
                         )
 
+                        file_path = None
                         if records:
-                            # Save to file
+                            # Save to file with module folder
                             file_path = save_export_data(
-                                records, subscriber_name, gstin, from_stamp, to_stamp
+                                records, subscriber_name, gstin, from_stamp, to_stamp, module
                             )
                             result['files_created'].append(file_path)
                             result['total_records'] += len(records)
-                            logger.info(f"Saved {len(records)} records for GSTIN {gstin}")
+                            logger.info(f"Saved {len(records)} {module} records for GSTIN {gstin}")
                         else:
-                            logger.info(f"No records found for GSTIN {gstin}")
+                            logger.info(f"No {module} records found for GSTIN {gstin}")
+
+                        # Log API transactions to tenant database
+                        self._log_transactions(
+                            transactions, db_name, db_host, db_port, db_user, db_password,
+                            gstin, from_stamp, to_stamp, file_path
+                        )
 
                     except Exception as e:
-                        error_msg = f"Error fetching data for GSTIN {gstin}: {str(e)}"
+                        error_msg = f"Error fetching {module} data for GSTIN {gstin}: {str(e)}"
                         logger.error(error_msg)
                         result['errors'].append(error_msg)
 
@@ -207,6 +305,7 @@ class ExportScheduler:
                 status,
                 error_msg,
                 {
+                    'module': result['module'],
                     'files_created': result['files_created'],
                     'total_records': result['total_records'],
                     'from_stamp': from_stamp.isoformat(),
@@ -214,7 +313,7 @@ class ExportScheduler:
                 }
             )
 
-            logger.info(f"Task {task_id} completed: {result['total_records']} records, {len(result['files_created'])} files")
+            logger.info(f"Task {task_id} completed: {result['total_records']} {module} records, {len(result['files_created'])} files")
 
         except Exception as e:
             error_msg = f"Task execution failed: {str(e)}"

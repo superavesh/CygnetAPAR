@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Users, Calendar, LayoutDashboard } from 'lucide-react';
+import { Users, Calendar, LayoutDashboard, FileText } from 'lucide-react';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -11,6 +11,7 @@ export default function Navbar() {
     { href: '/', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/subscribers', label: 'Clients', icon: Users },
     { href: '/schedules', label: 'Schedules', icon: Calendar },
+    { href: '/transaction-logs', label: 'API Logs', icon: FileText },
   ];
 
   return (

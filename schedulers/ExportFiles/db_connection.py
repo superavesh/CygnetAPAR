@@ -5,6 +5,8 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from contextlib import contextmanager
 from typing import Generator, List, Dict, Any, Optional
+import json
+from datetime import datetime
 from config import db_config
 import logging
 
@@ -156,7 +158,6 @@ def log_task_execution(task_id: int, subscriber_id: str, status: str,
 def update_task_execution_log(log_id: int, status: str, error_message: str = None,
                                execution_details: dict = None) -> None:
     """Update task execution log with completion status"""
-    import json
     details_json = json.dumps(execution_details or {})
 
     query = """
@@ -172,3 +173,103 @@ def update_task_execution_log(log_id: int, status: str, error_message: str = Non
         with conn.cursor() as cur:
             cur.execute(query, (status, error_message, details_json, log_id))
             conn.commit()
+
+
+def ensure_transaction_logs_table(db_name: str, db_host: str, db_port: int,
+                                   db_user: str, db_password: str) -> None:
+    """Create transaction_logs table in tenant database if it doesn't exist"""
+    create_table_query = """
+        CREATE TABLE IF NOT EXISTS transaction_logs (
+            id SERIAL PRIMARY KEY,
+            module VARCHAR(50) NOT NULL,
+            request_url TEXT NOT NULL,
+            request_method VARCHAR(10) DEFAULT 'POST',
+            request_headers JSONB,
+            request_body JSONB,
+            response_status_code INTEGER,
+            response_headers JSONB,
+            response_file_path TEXT,
+            gstin VARCHAR(15),
+            from_stamp TIMESTAMP,
+            to_stamp TIMESTAMP,
+            stamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            execution_time_ms INTEGER,
+            is_success BOOLEAN DEFAULT true,
+            error_message TEXT
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_transaction_logs_module ON transaction_logs(module);
+        CREATE INDEX IF NOT EXISTS idx_transaction_logs_gstin ON transaction_logs(gstin);
+        CREATE INDEX IF NOT EXISTS idx_transaction_logs_stamp ON transaction_logs(stamp);
+    """
+
+    with get_tenant_connection(db_name, db_host, db_port, db_user, db_password) as conn:
+        with conn.cursor() as cur:
+            cur.execute(create_table_query)
+            conn.commit()
+            logger.info(f"Ensured transaction_logs table exists in {db_name}")
+
+
+def log_api_transaction(db_name: str, db_host: str, db_port: int,
+                        db_user: str, db_password: str,
+                        transaction_data: Dict[str, Any]) -> int:
+    """
+    Log an API transaction to the tenant database
+
+    Args:
+        db_name: Tenant database name
+        db_host: Database host
+        db_port: Database port
+        db_user: Database user
+        db_password: Database password
+        transaction_data: Dictionary containing transaction details
+
+    Returns:
+        ID of the inserted log record
+    """
+    insert_query = """
+        INSERT INTO transaction_logs (
+            module,
+            request_url,
+            request_method,
+            request_headers,
+            request_body,
+            response_status_code,
+            response_headers,
+            response_file_path,
+            gstin,
+            from_stamp,
+            to_stamp,
+            stamp,
+            execution_time_ms,
+            is_success,
+            error_message
+        ) VALUES (
+            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+        )
+        RETURNING id
+    """
+
+    with get_tenant_connection(db_name, db_host, db_port, db_user, db_password) as conn:
+        with conn.cursor() as cur:
+            cur.execute(insert_query, (
+                transaction_data.get('module'),
+                transaction_data.get('request_url'),
+                transaction_data.get('request_method', 'POST'),
+                json.dumps(transaction_data.get('request_headers', {})),
+                json.dumps(transaction_data.get('request_body', {})),
+                transaction_data.get('response_status_code'),
+                json.dumps(transaction_data.get('response_headers', {})),
+                transaction_data.get('response_file_path'),
+                transaction_data.get('gstin'),
+                transaction_data.get('from_stamp'),
+                transaction_data.get('to_stamp'),
+                transaction_data.get('stamp', datetime.now()),
+                transaction_data.get('execution_time_ms'),
+                transaction_data.get('is_success', True),
+                transaction_data.get('error_message')
+            ))
+            log_id = cur.fetchone()[0]
+            conn.commit()
+            logger.info(f"Logged API transaction {log_id} for module {transaction_data.get('module')}")
+            return log_id

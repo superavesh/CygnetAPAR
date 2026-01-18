@@ -5,12 +5,54 @@ Handles API calls to fetch export data
 import requests
 import json
 import os
+import time
 from datetime import datetime
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
+from dataclasses import dataclass
 from config import scheduler_config
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+# Module configuration - defines API endpoints for different modules
+MODULE_ENDPOINTS = {
+    # Transaction modules
+    'sale': '/enriched/v0.1/oregular/sale/export',
+    'purchase': '/enriched/v0.1/oregular/purchase/export',
+    'einvoice': '/enriched/v0.1/oregular/einvoice/export',
+    'ewaybill': '/enriched/v0.1/oregular/ewaybill/export',
+    'creditnote': '/enriched/v0.1/oregular/creditnote/export',
+    'debitnote': '/enriched/v0.1/oregular/debitnote/export',
+    # GSTR modules
+    '2b': '/enriched/v0.1/oregular/gstr2b/export',
+    'einv_generated': '/enriched/v0.1/oregular/einv-generated/export',
+    'sales_auto_draft': '/enriched/v0.1/oregular/sales-auto-draft/export',
+    # Reconciliation modules
+    'recon_sales_autodraft': '/enriched/v0.1/oregular/recon/sales-autodraft/export',
+    'recon_sales_einv': '/enriched/v0.1/oregular/recon/sales-einv/export',
+    'recon_2b_pr': '/enriched/v0.1/oregular/recon/2b-pr/export',
+    # Master data modules
+    'customer_master': '/enriched/v0.1/oregular/master/customer/export',
+    'location_master': '/enriched/v0.1/oregular/master/location/export',
+    'user_master': '/enriched/v0.1/oregular/master/user/export',
+    'vendor_master': '/enriched/v0.1/oregular/master/vendor/export',
+}
+
+
+@dataclass
+class ApiTransactionInfo:
+    """Data class to hold API transaction information for logging"""
+    module: str
+    request_url: str
+    request_method: str
+    request_headers: Dict[str, Any]
+    request_body: Dict[str, Any]
+    response_status_code: int
+    response_headers: Dict[str, Any]
+    execution_time_ms: int
+    is_success: bool
+    error_message: Optional[str] = None
 
 
 class ExportApiClient:
@@ -50,12 +92,13 @@ class ExportApiClient:
 
         return int(f"{fy_start}{str(fy_end)[-2:]}")
 
-    def fetch_sale_export(self, gstin: str, from_stamp: datetime, to_stamp: datetime,
-                          start: int = 0, size: int = 1000) -> Dict[str, Any]:
+    def fetch_module_export(self, module: str, gstin: str, from_stamp: datetime, to_stamp: datetime,
+                             start: int = 0, size: int = 1000) -> Tuple[Dict[str, Any], ApiTransactionInfo]:
         """
-        Fetch sale export data from the API
+        Fetch export data from the API for any module
 
         Args:
+            module: Module name (sale, purchase, einvoice, etc.)
             gstin: GSTIN of the location
             from_stamp: Start datetime for data fetch
             to_stamp: End datetime for data fetch
@@ -63,9 +106,13 @@ class ExportApiClient:
             size: Number of records to fetch
 
         Returns:
-            API response as dictionary
+            Tuple of (API response as dictionary, ApiTransactionInfo for logging)
         """
-        url = f"{self.base_url}/enriched/v0.1/oregular/sale/export"
+        endpoint = MODULE_ENDPOINTS.get(module)
+        if not endpoint:
+            raise ValueError(f"Unknown module: {module}. Available modules: {list(MODULE_ENDPOINTS.keys())}")
+
+        url = f"{self.base_url}{endpoint}"
 
         # Format dates for API
         from_stamp_str = from_stamp.strftime(scheduler_config.api_date_format)
@@ -85,24 +132,136 @@ class ExportApiClient:
             "toStamp": to_stamp_str
         }
 
-        logger.info(f"Fetching sale export: GSTIN={gstin}, from={from_stamp_str}, to={to_stamp_str}, FY={financial_year}")
+        # Prepare headers for logging (mask auth token for security)
+        headers_for_log = {k: ('***' if k == 'auth-token' else v) for k, v in self.headers.items()}
+
+        logger.info(f"Fetching {module} export: GSTIN={gstin}, from={from_stamp_str}, to={to_stamp_str}, FY={financial_year}")
+
+        start_time = time.time()
+        transaction_info = None
 
         try:
             response = requests.post(url, headers=self.headers, json=payload, timeout=120)
-            response.raise_for_status()
+            execution_time_ms = int((time.time() - start_time) * 1000)
 
+            # Create transaction info for logging
+            transaction_info = ApiTransactionInfo(
+                module=module,
+                request_url=url,
+                request_method='POST',
+                request_headers=headers_for_log,
+                request_body=payload,
+                response_status_code=response.status_code,
+                response_headers=dict(response.headers),
+                execution_time_ms=execution_time_ms,
+                is_success=response.ok,
+                error_message=None if response.ok else response.text[:500]
+            )
+
+            response.raise_for_status()
             data = response.json()
             logger.info(f"API Response: {len(data.get('result', []))} records fetched")
-            return data
+            return data, transaction_info
 
         except requests.exceptions.RequestException as e:
+            execution_time_ms = int((time.time() - start_time) * 1000)
+            error_msg = str(e)
+
+            # Create transaction info even for failed requests
+            if transaction_info is None:
+                transaction_info = ApiTransactionInfo(
+                    module=module,
+                    request_url=url,
+                    request_method='POST',
+                    request_headers=headers_for_log,
+                    request_body=payload,
+                    response_status_code=getattr(e.response, 'status_code', 0) if hasattr(e, 'response') else 0,
+                    response_headers=dict(getattr(e.response, 'headers', {})) if hasattr(e, 'response') and e.response else {},
+                    execution_time_ms=execution_time_ms,
+                    is_success=False,
+                    error_message=error_msg[:500]
+                )
+
             logger.error(f"API request failed: {e}")
             raise
 
-    def fetch_all_sale_export(self, gstin: str, from_stamp: datetime,
-                               to_stamp: datetime) -> List[Dict[str, Any]]:
+    def fetch_sale_export(self, gstin: str, from_stamp: datetime, to_stamp: datetime,
+                          start: int = 0, size: int = 1000) -> Tuple[Dict[str, Any], ApiTransactionInfo]:
         """
-        Fetch all sale export data with pagination
+        Fetch sale export data from the API (backward compatible method)
+
+        Args:
+            gstin: GSTIN of the location
+            from_stamp: Start datetime for data fetch
+            to_stamp: End datetime for data fetch
+            start: Pagination start index
+            size: Number of records to fetch
+
+        Returns:
+            Tuple of (API response as dictionary, ApiTransactionInfo for logging)
+        """
+        return self.fetch_module_export('sale', gstin, from_stamp, to_stamp, start, size)
+
+    def fetch_all_module_export(self, module: str, gstin: str, from_stamp: datetime,
+                                 to_stamp: datetime) -> Tuple[List[Dict[str, Any]], List[ApiTransactionInfo]]:
+        """
+        Fetch all export data with pagination for any module.
+
+        Pagination logic:
+        - start: Starting record index (0-based)
+        - size: Number of records to fetch per request (default 1000)
+        - totalRecords: Total available records returned by API
+
+        Example: If totalRecords = 1298
+        - 1st call: start=0, size=1000 -> fetches records 0-999 (1000 records)
+        - 2nd call: start=1000, size=1000 -> fetches records 1000-1297 (298 records)
+        - Loop ends when all records are fetched
+
+        Args:
+            module: Module name (sale, purchase, einvoice, etc.)
+            gstin: GSTIN of the location
+            from_stamp: Start datetime for data fetch
+            to_stamp: End datetime for data fetch
+
+        Returns:
+            Tuple of (List of all records, List of ApiTransactionInfo for all API calls)
+        """
+        all_records = []
+        all_transactions = []
+        start = 0
+        size = scheduler_config.default_page_size
+        total_records = None  # Will be set from first API response
+
+        while True:
+            logger.info(f"Fetching {module} records: start={start}, size={size}")
+            response, transaction_info = self.fetch_module_export(module, gstin, from_stamp, to_stamp, start, size)
+            all_transactions.append(transaction_info)
+
+            records = response.get('result', [])
+            total_records = response.get('totalRecords', 0)
+
+            # If no records returned, we're done
+            if not records:
+                logger.info(f"No more {module} records to fetch for GSTIN {gstin}")
+                break
+
+            all_records.extend(records)
+            logger.info(f"Fetched {len(all_records)}/{total_records} {module} records for GSTIN {gstin}")
+
+            # Check if we've fetched all records
+            if len(all_records) >= total_records:
+                logger.info(f"All {total_records} {module} records fetched for GSTIN {gstin}")
+                break
+
+            # Move to next page
+            start += size
+
+        return all_records, all_transactions
+
+    def fetch_all_sale_export(self, gstin: str, from_stamp: datetime,
+                               to_stamp: datetime) -> Tuple[List[Dict[str, Any]], List[ApiTransactionInfo]]:
+        """
+        Fetch all sale export data with pagination (backward compatible method)
 
         Args:
             gstin: GSTIN of the location
@@ -110,36 +269,14 @@ class ExportApiClient:
             to_stamp: End datetime for data fetch
 
         Returns:
-            List of all records
+            Tuple of (List of all records, List of ApiTransactionInfo for all API calls)
         """
-        all_records = []
-        start = 0
-        size = scheduler_config.default_page_size
-        has_more = True
-
-        while has_more:
-            response = self.fetch_sale_export(gstin, from_stamp, to_stamp, start, size)
-
-            records = response.get('result', [])
-            total_records = response.get('totalRecords', 0)
-
-            if not records:
-                has_more = False
-                break
-
-            all_records.extend(records)
-            logger.info(f"Fetched {len(all_records)}/{total_records} records for GSTIN {gstin}")
-
-            if len(all_records) >= total_records or len(records) < size:
-                has_more = False
-            else:
-                start += size
-
-        return all_records
+        return self.fetch_all_module_export('sale', gstin, from_stamp, to_stamp)
 
 
 def save_export_data(data: List[Dict[str, Any]], subscriber_name: str,
-                     gstin: str, from_stamp: datetime, to_stamp: datetime) -> str:
+                     gstin: str, from_stamp: datetime, to_stamp: datetime,
+                     module: str = 'sale') -> str:
     """
     Save export data to file
 
@@ -149,15 +286,17 @@ def save_export_data(data: List[Dict[str, Any]], subscriber_name: str,
         gstin: GSTIN of the location
         from_stamp: Start datetime
         to_stamp: End datetime
+        module: Module name (sale, purchase, einvoice, etc.)
 
     Returns:
         Path to the saved file
     """
-    # Create directory structure: base_dir/subscriber_name/YYYY/MM/DD/
+    # Create directory structure: base_dir/subscriber_name/module/YYYY/MM/DD/
     timestamp = datetime.now()
     dir_path = os.path.join(
         scheduler_config.output_base_dir,
         sanitize_filename(subscriber_name),
+        module,  # Add module folder
         str(timestamp.year),
         str(timestamp.month).zfill(2),
         str(timestamp.day).zfill(2)
@@ -178,6 +317,7 @@ def save_export_data(data: List[Dict[str, Any]], subscriber_name: str,
         "metadata": {
             "subscriber_name": subscriber_name,
             "gstin": gstin,
+            "module": module,
             "from_stamp": from_stamp.isoformat(),
             "to_stamp": to_stamp.isoformat(),
             "exported_at": timestamp.isoformat(),
@@ -189,7 +329,7 @@ def save_export_data(data: List[Dict[str, Any]], subscriber_name: str,
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(export_data, f, indent=2, ensure_ascii=False, default=str)
 
-    logger.info(f"Saved {len(data)} records to {file_path}")
+    logger.info(f"Saved {len(data)} {module} records to {file_path}")
     return file_path
 
 

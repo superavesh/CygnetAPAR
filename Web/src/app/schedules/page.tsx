@@ -15,6 +15,8 @@ import {
   RefreshCw,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Modal from '@/components/Modal';
@@ -90,6 +92,11 @@ export default function SchedulesPage() {
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [expandedLogIds, setExpandedLogIds] = useState<Set<number>>(new Set());
+
+  // Logs pagination state
+  const [logsPage, setLogsPage] = useState(1);
+  const [logsPageSize] = useState(20);
+  const [logsTotalCount, setLogsTotalCount] = useState(0);
 
   const fetchTasks = async () => {
     try {
@@ -258,14 +265,16 @@ export default function SchedulesPage() {
     }
   };
 
-  const fetchLogs = async (taskId: number) => {
+  const fetchLogs = async (taskId: number, page: number = 1) => {
     setIsLoadingLogs(true);
     try {
-      const response = await fetch(`/api/schedules/${taskId}/logs`);
+      const offset = (page - 1) * logsPageSize;
+      const response = await fetch(`/api/schedules/${taskId}/logs?limit=${logsPageSize}&offset=${offset}`);
       const data = await response.json();
 
       if (data.success) {
         setTaskLogs(data.data.logs);
+        setLogsTotalCount(data.data.pagination?.total || 0);
       }
     } catch (error) {
       console.error('Error fetching logs:', error);
@@ -275,10 +284,19 @@ export default function SchedulesPage() {
     }
   };
 
+  const handleLogsPageChange = (newPage: number) => {
+    setLogsPage(newPage);
+    if (selectedTask) {
+      fetchLogs(selectedTask.id, newPage);
+    }
+  };
+
   const openLogsModal = (task: ScheduledTask) => {
     setSelectedTask(task);
+    setLogsPage(1);
+    setLogsTotalCount(0);
     setIsLogsModalOpen(true);
-    fetchLogs(task.id);
+    fetchLogs(task.id, 1);
   };
 
   const openEditModal = (task: ScheduledTask) => {
@@ -515,11 +533,13 @@ export default function SchedulesPage() {
           setSelectedTask(null);
           setTaskLogs([]);
           setExpandedLogIds(new Set());
+          setLogsPage(1);
+          setLogsTotalCount(0);
         }}
         title={`Execution Logs: ${selectedTask?.taskName}`}
         size="xl"
       >
-        {isLoadingLogs ? (
+        {isLoadingLogs && taskLogs.length === 0 ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
             <Loader2 size={24} className="spinner" />
           </div>
@@ -528,137 +548,196 @@ export default function SchedulesPage() {
             No execution logs yet
           </div>
         ) : (
-          <div style={{ maxHeight: '500px', overflow: 'auto' }}>
-            <table className="table" style={{ tableLayout: 'fixed', width: '100%' }}>
-              <thead>
-                <tr>
-                  <th style={{ width: '180px' }}>Started At</th>
-                  <th style={{ width: '100px' }}>Status</th>
-                  <th style={{ width: '100px' }}>Duration</th>
-                  <th>Details / Error</th>
-                </tr>
-              </thead>
-              <tbody>
-                {taskLogs.map((log) => {
-                  const isExpanded = expandedLogIds.has(log.id);
-                  const errorMsg = log.errorMessage || '';
-                  const hasLongError = errorMsg.length > 100;
-                  const displayError = hasLongError && !isExpanded
-                    ? errorMsg.substring(0, 100) + '...'
-                    : errorMsg;
+          <div>
+            {/* Pagination info header */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1rem',
+              padding: '0 0.5rem',
+            }}>
+              <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                Showing {((logsPage - 1) * logsPageSize) + 1} - {Math.min(logsPage * logsPageSize, logsTotalCount)} of {logsTotalCount} logs
+              </div>
+              {isLoadingLogs && (
+                <Loader2 size={16} className="spinner" />
+              )}
+            </div>
 
-                  // Parse execution details
-                  const details = log.executionDetails || {};
-                  const hasDetails = Object.keys(details).length > 0;
+            <div style={{ maxHeight: '400px', overflow: 'auto' }}>
+              <table className="table" style={{ tableLayout: 'fixed', width: '100%' }}>
+                <thead>
+                  <tr>
+                    <th style={{ width: '180px' }}>Started At</th>
+                    <th style={{ width: '100px' }}>Status</th>
+                    <th style={{ width: '100px' }}>Duration</th>
+                    <th>Details / Error</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {taskLogs.map((log) => {
+                    const isExpanded = expandedLogIds.has(log.id);
+                    const errorMsg = log.errorMessage || '';
+                    const hasLongError = errorMsg.length > 100;
+                    const displayError = hasLongError && !isExpanded
+                      ? errorMsg.substring(0, 100) + '...'
+                      : errorMsg;
 
-                  return (
-                    <tr key={log.id} style={{ verticalAlign: 'top' }}>
-                      <td style={{ fontSize: '0.875rem' }}>
-                        {format(new Date(log.startedAt), 'MMM d, yyyy HH:mm:ss')}
-                        {log.completedAt && (
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                            Completed: {format(new Date(log.completedAt), 'HH:mm:ss')}
-                          </div>
-                        )}
-                      </td>
-                      <td>
-                        <span className={`badge ${
-                          log.status === 'success' ? 'badge-success' :
-                          log.status === 'failed' ? 'badge-error' :
-                          'badge-warning'
-                        }`}>
-                          {log.status}
-                        </span>
-                      </td>
-                      <td style={{ fontSize: '0.875rem' }}>
-                        {log.completedAt
-                          ? `${Math.round((new Date(log.completedAt).getTime() - new Date(log.startedAt).getTime()) / 1000)}s`
-                          : 'Running...'
-                        }
-                      </td>
-                      <td style={{ fontSize: '0.8rem' }}>
-                        {/* Error Message */}
-                        {errorMsg && (
-                          <div style={{
-                            backgroundColor: '#fef2f2',
-                            border: '1px solid #fecaca',
-                            borderRadius: '0.375rem',
-                            padding: '0.5rem',
-                            marginBottom: hasDetails ? '0.5rem' : 0,
-                            color: 'var(--error)',
-                            wordBreak: 'break-word',
-                          }}>
-                            <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>Error:</div>
-                            <div style={{ whiteSpace: isExpanded ? 'pre-wrap' : 'normal' }}>
-                              {displayError}
+                    // Parse execution details
+                    const details = log.executionDetails || {};
+                    const hasDetails = Object.keys(details).length > 0;
+
+                    return (
+                      <tr key={log.id} style={{ verticalAlign: 'top' }}>
+                        <td style={{ fontSize: '0.875rem' }}>
+                          {format(new Date(log.startedAt), 'MMM d, yyyy HH:mm:ss')}
+                          {log.completedAt && (
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                              Completed: {format(new Date(log.completedAt), 'HH:mm:ss')}
                             </div>
-                            {hasLongError && (
-                              <button
-                                onClick={() => toggleLogExpand(log.id)}
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  color: 'var(--primary)',
-                                  cursor: 'pointer',
-                                  padding: '0.25rem 0',
-                                  fontSize: '0.75rem',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '0.25rem',
-                                  marginTop: '0.25rem',
-                                }}
-                              >
-                                {isExpanded ? (
-                                  <>
-                                    <ChevronUp size={12} /> Show less
-                                  </>
-                                ) : (
-                                  <>
-                                    <ChevronDown size={12} /> Show more
-                                  </>
-                                )}
-                              </button>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Execution Details */}
-                        {hasDetails && (
-                          <div style={{
-                            backgroundColor: '#f0f9ff',
-                            border: '1px solid #bae6fd',
-                            borderRadius: '0.375rem',
-                            padding: '0.5rem',
-                            color: 'var(--text-secondary)',
-                          }}>
-                            <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
-                              Details:
+                          )}
+                        </td>
+                        <td>
+                          <span className={`badge ${
+                            log.status === 'success' ? 'badge-success' :
+                            log.status === 'failed' ? 'badge-error' :
+                            'badge-warning'
+                          }`}>
+                            {log.status}
+                          </span>
+                        </td>
+                        <td style={{ fontSize: '0.875rem' }}>
+                          {log.completedAt
+                            ? `${Math.round((new Date(log.completedAt).getTime() - new Date(log.startedAt).getTime()) / 1000)}s`
+                            : 'Running...'
+                          }
+                        </td>
+                        <td style={{ fontSize: '0.8rem' }}>
+                          {/* Error Message */}
+                          {errorMsg && (
+                            <div style={{
+                              backgroundColor: '#fef2f2',
+                              border: '1px solid #fecaca',
+                              borderRadius: '0.375rem',
+                              padding: '0.5rem',
+                              marginBottom: hasDetails ? '0.5rem' : 0,
+                              color: 'var(--error)',
+                              wordBreak: 'break-word',
+                            }}>
+                              <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>Error:</div>
+                              <div style={{ whiteSpace: isExpanded ? 'pre-wrap' : 'normal' }}>
+                                {displayError}
+                              </div>
+                              {hasLongError && (
+                                <button
+                                  onClick={() => toggleLogExpand(log.id)}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: 'var(--primary)',
+                                    cursor: 'pointer',
+                                    padding: '0.25rem 0',
+                                    fontSize: '0.75rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.25rem',
+                                    marginTop: '0.25rem',
+                                  }}
+                                >
+                                  {isExpanded ? (
+                                    <>
+                                      <ChevronUp size={12} /> Show less
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ChevronDown size={12} /> Show more
+                                    </>
+                                  )}
+                                </button>
+                              )}
                             </div>
-                            {details.total_records !== undefined && (
-                              <div>Records: {details.total_records}</div>
-                            )}
-                            {details.files_created && details.files_created.length > 0 && (
-                              <div>Files: {details.files_created.length}</div>
-                            )}
-                            {details.from_stamp && (
-                              <div>From: {details.from_stamp}</div>
-                            )}
-                            {details.to_stamp && (
-                              <div>To: {details.to_stamp}</div>
-                            )}
-                          </div>
-                        )}
+                          )}
 
-                        {/* No error and no details */}
-                        {!errorMsg && !hasDetails && (
-                          <span style={{ color: 'var(--text-secondary)' }}>-</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                          {/* Execution Details */}
+                          {hasDetails && (
+                            <div style={{
+                              backgroundColor: '#f0f9ff',
+                              border: '1px solid #bae6fd',
+                              borderRadius: '0.375rem',
+                              padding: '0.5rem',
+                              color: 'var(--text-secondary)',
+                            }}>
+                              <div style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
+                                Details:
+                              </div>
+                              {details.total_records !== undefined && (
+                                <div>Records: {details.total_records}</div>
+                              )}
+                              {details.files_created && details.files_created.length > 0 && (
+                                <div>Files: {details.files_created.length}</div>
+                              )}
+                              {details.from_stamp && (
+                                <div>From: {details.from_stamp}</div>
+                              )}
+                              {details.to_stamp && (
+                                <div>To: {details.to_stamp}</div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* No error and no details */}
+                          {!errorMsg && !hasDetails && (
+                            <span style={{ color: 'var(--text-secondary)' }}>-</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination controls */}
+            {logsTotalCount > logsPageSize && (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '0.5rem',
+                marginTop: '1rem',
+                paddingTop: '1rem',
+                borderTop: '1px solid var(--border)',
+              }}>
+                <button
+                  className="btn btn-secondary"
+                  style={{ padding: '0.375rem 0.75rem' }}
+                  onClick={() => handleLogsPageChange(logsPage - 1)}
+                  disabled={logsPage <= 1 || isLoadingLogs}
+                >
+                  <ChevronLeft size={16} />
+                  Previous
+                </button>
+                <span style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '0 1rem',
+                  fontSize: '0.875rem',
+                  color: 'var(--text-secondary)',
+                }}>
+                  Page {logsPage} of {Math.ceil(logsTotalCount / logsPageSize)}
+                </span>
+                <button
+                  className="btn btn-secondary"
+                  style={{ padding: '0.375rem 0.75rem' }}
+                  onClick={() => handleLogsPageChange(logsPage + 1)}
+                  disabled={logsPage >= Math.ceil(logsTotalCount / logsPageSize) || isLoadingLogs}
+                >
+                  Next
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
           </div>
         )}
       </Modal>

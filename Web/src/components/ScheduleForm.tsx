@@ -33,6 +33,26 @@ const TASK_TYPES = [
   { value: 'custom', label: 'Custom', description: 'Custom task execution' },
 ];
 
+// Export module types - sub-task types when task type is "export"
+const EXPORT_MODULES = [
+  { value: 'sale', label: 'Sales', description: 'Export sales data' },
+  { value: 'purchase', label: 'Purchase', description: 'Export purchase data' },
+  { value: 'einvoice', label: 'EInvoice', description: 'Export e-invoice data' },
+  { value: '2b', label: '2B', description: 'Export GSTR-2B data' },
+  { value: 'einv_generated', label: 'EINV Generated Against Me', description: 'E-invoices generated against me' },
+  { value: 'sales_auto_draft', label: 'Sales Auto Draft', description: 'Export sales auto draft data' },
+  { value: 'recon_sales_autodraft', label: 'Recon - Sales and Autodraft', description: 'Reconciliation of sales and autodraft' },
+  { value: 'recon_sales_einv', label: 'Recon - Sales and EInv', description: 'Reconciliation of sales and e-invoice' },
+  { value: 'recon_2b_pr', label: 'Recon - 2B vs PR', description: 'Reconciliation of 2B vs purchase register' },
+  { value: 'customer_master', label: 'Customer Master', description: 'Export customer master data' },
+  { value: 'location_master', label: 'Location Master', description: 'Export location master data' },
+  { value: 'user_master', label: 'User Master', description: 'Export user master data' },
+  { value: 'vendor_master', label: 'Vendor Master', description: 'Export vendor master data' },
+  { value: 'creditnote', label: 'Credit Note', description: 'Export credit note data' },
+  { value: 'debitnote', label: 'Debit Note', description: 'Export debit note data' },
+  { value: 'ewaybill', label: 'E-Way Bill', description: 'Export e-way bill data' },
+];
+
 export default function ScheduleForm({
   onSubmit,
   onCancel,
@@ -54,6 +74,11 @@ export default function ScheduleForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [cronPreset, setCronPreset] = useState<string>('0 * * * *');
   const [isCustomCron, setIsCustomCron] = useState(false);
+
+  // Export module state - extract from taskConfig if editing
+  const [selectedExportModule, setSelectedExportModule] = useState<string>(
+    (initialData.taskConfig as any)?.module || 'sale'
+  );
 
   useEffect(() => {
     // Check if the initial cron expression matches any preset
@@ -97,6 +122,11 @@ export default function ScheduleForm({
       newErrors.startDatetime = 'Start datetime is required for export tasks';
     }
 
+    // Validate export module selection
+    if (formData.taskType === 'export' && !selectedExportModule) {
+      newErrors.exportModule = 'Please select an export module';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -106,7 +136,16 @@ export default function ScheduleForm({
 
     if (!validateForm()) return;
 
-    await onSubmit(formData);
+    // Include export module in taskConfig if task type is export
+    const submitData = { ...formData };
+    if (formData.taskType === 'export') {
+      submitData.taskConfig = {
+        ...formData.taskConfig,
+        module: selectedExportModule,
+      };
+    }
+
+    await onSubmit(submitData);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -220,6 +259,38 @@ export default function ScheduleForm({
           </p>
         )}
       </div>
+
+      {/* Export Module Selection - shown only when task type is export */}
+      {formData.taskType === 'export' && (
+        <div className="form-group">
+          <label htmlFor="exportModule" className="form-label">
+            Export Module *
+          </label>
+          <select
+            id="exportModule"
+            className="form-select"
+            value={selectedExportModule}
+            onChange={(e) => {
+              setSelectedExportModule(e.target.value);
+              if (errors.exportModule) {
+                setErrors(prev => ({ ...prev, exportModule: '' }));
+              }
+            }}
+            disabled={isLoading}
+          >
+            {EXPORT_MODULES.map((module) => (
+              <option key={module.value} value={module.value}>
+                {module.label} - {module.description}
+              </option>
+            ))}
+          </select>
+          {errors.exportModule && (
+            <p style={{ color: 'var(--error)', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+              {errors.exportModule}
+            </p>
+          )}
+        </div>
+      )}
 
       {formData.taskType === 'export' && (
         <div className="form-group">

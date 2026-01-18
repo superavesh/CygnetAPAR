@@ -30,10 +30,15 @@ def get_client_folders() -> List[str]:
     return client_folders
 
 
-def find_json_files(client_name: str) -> List[Path]:
+def find_json_files(client_name: str, module: str = None) -> List[Path]:
     """
-    Find all JSON files for a client, organized by date folders.
-    Structure: NFSShared/{ClientName}/{Year}/{Month}/{Day}/*.json
+    Find all JSON files for a client, organized by module and date folders.
+    Structure: NFSShared/{ClientName}/{Module}/{Year}/{Month}/{Day}/*.json
+    or legacy: NFSShared/{ClientName}/{Year}/{Month}/{Day}/*.json
+
+    Args:
+        client_name: Name of the client folder
+        module: Optional module name to filter (sale, purchase, einvoice, etc.)
     """
     base_dir = Path(scheduler_config.input_base_dir) / client_name
     json_files = []
@@ -42,21 +47,46 @@ def find_json_files(client_name: str) -> List[Path]:
         return json_files
 
     # Walk through the directory structure
-    for year_dir in base_dir.iterdir():
-        if not year_dir.is_dir() or year_dir.name.startswith('_'):
+    for first_level in base_dir.iterdir():
+        if not first_level.is_dir() or first_level.name.startswith('_'):
             continue
 
-        for month_dir in year_dir.iterdir():
-            if not month_dir.is_dir() or month_dir.name.startswith('_'):
-                continue
+        # Check if first level is a module folder or year folder
+        is_module_folder = first_level.name in ['sale', 'purchase', 'einvoice', 'ewaybill', 'creditnote', 'debitnote']
 
-            for day_dir in month_dir.iterdir():
-                if not day_dir.is_dir() or day_dir.name.startswith('_'):
+        if is_module_folder:
+            # New structure: {Client}/{Module}/{Year}/{Month}/{Day}/*.json
+            if module and first_level.name != module:
+                continue  # Skip if filtering by module
+
+            for year_dir in first_level.iterdir():
+                if not year_dir.is_dir() or year_dir.name.startswith('_'):
                     continue
 
-                # Find all JSON files in this day folder
-                for json_file in day_dir.glob('*.json'):
-                    json_files.append(json_file)
+                for month_dir in year_dir.iterdir():
+                    if not month_dir.is_dir() or month_dir.name.startswith('_'):
+                        continue
+
+                    for day_dir in month_dir.iterdir():
+                        if not day_dir.is_dir() or day_dir.name.startswith('_'):
+                            continue
+
+                        for json_file in day_dir.glob('*.json'):
+                            json_files.append(json_file)
+        else:
+            # Legacy structure: {Client}/{Year}/{Month}/{Day}/*.json
+            # Treat first_level as year_dir
+            year_dir = first_level
+            for month_dir in year_dir.iterdir():
+                if not month_dir.is_dir() or month_dir.name.startswith('_'):
+                    continue
+
+                for day_dir in month_dir.iterdir():
+                    if not day_dir.is_dir() or day_dir.name.startswith('_'):
+                        continue
+
+                    for json_file in day_dir.glob('*.json'):
+                        json_files.append(json_file)
 
     # Sort by file modification time (oldest first)
     json_files.sort(key=lambda f: f.stat().st_mtime)
