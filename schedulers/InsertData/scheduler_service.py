@@ -15,7 +15,12 @@ from db_connection import (
     get_tenant_connection,
     ensure_sales_table_exists,
     upsert_sales_records,
-    get_processed_files
+    get_processed_files,
+    ensure_processed_files_table,
+    get_all_processed_files,
+    mark_file_processed,
+    ensure_module_table_exists,
+    upsert_module_records,
 )
 from file_processor import (
     get_client_folders,
@@ -54,12 +59,13 @@ def signal_handler(signum, frame):
 
 def process_file(file_path, subscriber_info: Dict[str, Any], conn) -> Dict[str, Any]:
     """
-    Process a single JSON file and insert data into tenant database.
-    Returns processing result dictionary.
+    Process a single JSON file and insert data into the correct tenant table.
+    The module is read from the file's metadata field. Returns a result dict.
     """
     result = {
         'file': str(file_path),
         'success': False,
+        'module': None,
         'records_processed': 0,
         'inserted': 0,
         'updated': 0,
@@ -87,8 +93,14 @@ def process_file(file_path, subscriber_info: Dict[str, Any], conn) -> Dict[str, 
         metadata = extract_metadata(data)
         records = extract_records(data)
 
-        logger.info(f"File metadata - Subscriber: {metadata.get('subscriber_name')}, "
-                   f"GSTIN: {metadata.get('gstin')}, Records: {len(records)}")
+        # Determine module from metadata (default to 'sale' for backward compatibility)
+        module = metadata.get('module', 'sale')
+        result['module'] = module
+
+        logger.info(
+            f"File metadata - Subscriber: {metadata.get('subscriber_name')}, "
+            f"GSTIN: {metadata.get('gstin')}, Module: {module}, Records: {len(records)}"
+        )
 
         if not records:
             logger.info(f"No records to process in file: {file_path.name}")
@@ -98,15 +110,23 @@ def process_file(file_path, subscriber_info: Dict[str, Any], conn) -> Dict[str, 
         # Get relative path for source_file tracking
         relative_path = get_relative_file_path(file_path)
 
-        # Upsert records
-        inserted, updated = upsert_sales_records(conn, records, relative_path)
+        # Ensure the correct table exists for this module
+        ensure_module_table_exists(conn, module)
+
+        # Route to the correct upsert function
+        inserted, updated = upsert_module_records(conn, module, records, relative_path)
+
+        # Record the file as processed in the tracking table
+        mark_file_processed(conn, relative_path, module, inserted, updated)
 
         result['success'] = True
         result['records_processed'] = len(records)
         result['inserted'] = inserted
         result['updated'] = updated
 
-        logger.info(f"Processed {file_path.name}: {inserted} inserted, {updated} updated")
+        logger.info(
+            f"Processed {file_path.name} [{module}]: {inserted} inserted, {updated} updated"
+        )
 
         # Archive the file after successful processing
         if scheduler_config.archive_processed:
@@ -153,11 +173,11 @@ def process_client(client_name: str) -> Dict[str, Any]:
             subscriber_info['db_user'],
             subscriber_info['db_password']
         ) as conn:
-            # Ensure sales table exists
-            ensure_sales_table_exists(conn)
+            # Ensure the central processed-files tracking table exists
+            ensure_processed_files_table(conn)
 
-            # Get list of already processed files
-            processed_files = get_processed_files(conn)
+            # Get list of all already-processed files (across all modules)
+            processed_files = get_all_processed_files(conn)
             logger.info(f"Found {len(processed_files)} previously processed files")
 
             # Get files to process

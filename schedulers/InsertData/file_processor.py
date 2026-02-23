@@ -52,7 +52,20 @@ def find_json_files(client_name: str, module: str = None) -> List[Path]:
             continue
 
         # Check if first level is a module folder or year folder
-        is_module_folder = first_level.name in ['sale', 'purchase', 'einvoice', 'ewaybill', 'creditnote', 'debitnote']
+        is_module_folder = first_level.name in [
+            # Transaction modules
+            'sale', 'purchase', 'einvoice', 'ewaybill', 'creditnote', 'debitnote',
+            # Additional document modules
+            'einv_generated', 'sales_auto_draft',
+            # GSTR modules
+            '2b',
+            # Reconciliation modules
+            'recon_sales_autodraft', 'recon_sales_einv', 'recon_2b_pr',
+            # Master data modules
+            'location_master', 'user_master',
+            # Additional master modules
+            'customer_master', 'vendor_master',
+        ]
 
         if is_module_folder:
             # New structure: {Client}/{Module}/{Year}/{Month}/{Day}/*.json

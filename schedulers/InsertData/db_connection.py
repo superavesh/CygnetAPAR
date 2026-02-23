@@ -778,3 +778,1597 @@ def get_processed_files(conn) -> set:
     except Exception as e:
         logger.warning(f"Could not get processed files (table may not exist): {e}")
         return set()
+
+
+# =============================================================================
+# Module → table name mapping
+# =============================================================================
+
+MODULE_TABLE_MAP: Dict[str, str] = {
+    'sale':                  'sales',
+    'purchase':              'purchase',
+    'einvoice':              'einvoice',
+    'ewaybill':              'ewaybill',
+    'creditnote':            'creditnote',
+    'debitnote':             'debitnote',
+    'einv_generated':        'einv_generated',
+    'sales_auto_draft':      'sales_auto_draft',
+    '2b':                    'gstr2b',
+    'recon_sales_autodraft': 'recon_3way',
+    'recon_sales_einv':      'recon_3way',
+    'recon_2b_pr':           'recon_2b_pr',
+    'location_master':       'location_master',
+    'user_master':           'user_master',
+}
+
+
+# =============================================================================
+# Processed-files tracking table (one row per file, across all modules)
+# =============================================================================
+
+def ensure_processed_files_table(conn) -> None:
+    """Create the central processed_files tracking table if it does not exist."""
+    sql = """
+        CREATE TABLE IF NOT EXISTS processed_files (
+            id              SERIAL PRIMARY KEY,
+            source_file     TEXT NOT NULL UNIQUE,
+            module          VARCHAR(50),
+            records_inserted INTEGER DEFAULT 0,
+            records_updated  INTEGER DEFAULT 0,
+            processed_at    TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE INDEX IF NOT EXISTS idx_processed_files_source ON processed_files(source_file);
+        CREATE INDEX IF NOT EXISTS idx_processed_files_module ON processed_files(module);
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql)
+        conn.commit()
+        logger.info("Ensured processed_files tracking table exists")
+
+
+def get_all_processed_files(conn) -> set:
+    """Return a set of source_file paths that have already been processed."""
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT source_file FROM processed_files")
+            return {row[0] for row in cur.fetchall()}
+    except Exception as e:
+        logger.warning(f"Could not read processed_files table: {e}")
+        return set()
+
+
+def mark_file_processed(conn, source_file: str, module: str,
+                        inserted: int, updated: int) -> None:
+    """Record a file as successfully processed in the tracking table."""
+    sql = """
+        INSERT INTO processed_files (source_file, module, records_inserted, records_updated)
+        VALUES (%s, %s, %s, %s)
+        ON CONFLICT (source_file) DO UPDATE SET
+            records_inserted = EXCLUDED.records_inserted,
+            records_updated  = EXCLUDED.records_updated,
+            processed_at     = CURRENT_TIMESTAMP
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql, (source_file, module, inserted, updated))
+        conn.commit()
+
+
+# =============================================================================
+# Helper: sum item-level tax amounts from a document record
+# =============================================================================
+
+def _sum_item_taxes(record: Dict[str, Any]) -> Dict[str, float]:
+    """Sum tax amounts across all items in a document record."""
+    items = record.get('items') or []
+    return {
+        'taxable_value': sum((item.get('taxableValue') or 0) for item in items),
+        'igst_amount':   sum((item.get('igstAmount')   or 0) for item in items),
+        'cgst_amount':   sum((item.get('cgstAmount')   or 0) for item in items),
+        'sgst_amount':   sum((item.get('sgstAmount')   or 0) for item in items),
+        'cess_amount':   sum((item.get('cessAmount')   or 0) for item in items),
+    }
+
+
+# =============================================================================
+# Purchase table
+# Each purchase invoice has its own row; items stored as JSONB array.
+# =============================================================================
+
+def ensure_purchase_table_exists(conn) -> None:
+    """Create the purchase table in the tenant database."""
+    sql = """
+        CREATE TABLE IF NOT EXISTS purchase (
+            id                      SERIAL PRIMARY KEY,
+            location_gstin          VARCHAR(20) NOT NULL,
+            location_name           VARCHAR(500),
+            document_type           VARCHAR(20),
+            document_number         VARCHAR(100) NOT NULL,
+            document_date           VARCHAR(20)  NOT NULL,
+            transaction_type        VARCHAR(50),
+            supplier_gstin          VARCHAR(20),
+            supplier_legal_name     VARCHAR(500),
+            supplier_trade_name     VARCHAR(500),
+            return_period           INTEGER,
+            pos                     INTEGER,
+            reverse_charge          VARCHAR(5),
+            irn                     VARCHAR(100),
+            taxable_value           DECIMAL(18,2),
+            igst_amount             DECIMAL(18,2),
+            cgst_amount             DECIMAL(18,2),
+            sgst_amount             DECIMAL(18,2),
+            cess_amount             DECIMAL(18,2),
+            document_value          DECIMAL(18,2),
+            filing_status           VARCHAR(50),
+            push_status             VARCHAR(50),
+            is_amendment            VARCHAR(5),
+            itc_eligibility         VARCHAR(50),
+            items                   JSONB,
+            raw_data                JSONB,
+            source_file             VARCHAR(500),
+            stamp                   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            modified_stamp          TIMESTAMP WITH TIME ZONE,
+            CONSTRAINT purchase_unique_record UNIQUE (document_number, document_date, location_gstin)
+        );
+        CREATE INDEX IF NOT EXISTS idx_purchase_location_gstin  ON purchase(location_gstin);
+        CREATE INDEX IF NOT EXISTS idx_purchase_document_date   ON purchase(document_date);
+        CREATE INDEX IF NOT EXISTS idx_purchase_document_number ON purchase(document_number);
+        CREATE INDEX IF NOT EXISTS idx_purchase_supplier_gstin  ON purchase(supplier_gstin);
+        CREATE INDEX IF NOT EXISTS idx_purchase_return_period   ON purchase(return_period);
+        CREATE INDEX IF NOT EXISTS idx_purchase_stamp           ON purchase(stamp);
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql)
+        conn.commit()
+        logger.info("Ensured purchase table exists")
+
+
+def upsert_purchase_records(conn, records: List[Dict[str, Any]],
+                             source_file: str) -> Tuple[int, int]:
+    if not records:
+        return 0, 0
+
+    columns = [
+        'location_gstin', 'location_name', 'document_type', 'document_number',
+        'document_date', 'transaction_type', 'supplier_gstin', 'supplier_legal_name',
+        'supplier_trade_name', 'return_period', 'pos', 'reverse_charge', 'irn',
+        'taxable_value', 'igst_amount', 'cgst_amount', 'sgst_amount', 'cess_amount',
+        'document_value', 'filing_status', 'push_status', 'is_amendment',
+        'itc_eligibility', 'items', 'raw_data', 'source_file',
+    ]
+    update_cols = [c for c in columns if c not in ('document_number', 'document_date', 'location_gstin')]
+    update_clause = ', '.join(f"{c} = EXCLUDED.{c}" for c in update_cols)
+    update_clause += ", modified_stamp = CURRENT_TIMESTAMP"
+
+    sql = f"""
+        INSERT INTO purchase ({', '.join(columns)})
+        VALUES ({', '.join(['%s'] * len(columns))})
+        ON CONFLICT (document_number, document_date, location_gstin)
+        DO UPDATE SET {update_clause}
+        RETURNING (xmax = 0) AS is_insert
+    """
+
+    inserted_count = updated_count = 0
+    with conn.cursor() as cur:
+        for record in records:
+            t = _sum_item_taxes(record)
+            row = {
+                'location_gstin':      record.get('locationGstin'),
+                'location_name':       record.get('locationName'),
+                'document_type':       record.get('documentType'),
+                'document_number':     record.get('documentNumber'),
+                'document_date':       record.get('documentDate'),
+                'transaction_type':    record.get('transactionType'),
+                'supplier_gstin':      record.get('billFromGstin') or record.get('supplierGstin'),
+                'supplier_legal_name': record.get('billFromLegalName') or record.get('supplierLegalName'),
+                'supplier_trade_name': record.get('billFromTradeName') or record.get('supplierTradeName'),
+                'return_period':       record.get('returnPeriod'),
+                'pos':                 record.get('pos'),
+                'reverse_charge':      record.get('reverseCharge'),
+                'irn':                 record.get('irn'),
+                'taxable_value':       t['taxable_value'],
+                'igst_amount':         t['igst_amount'],
+                'cgst_amount':         t['cgst_amount'],
+                'sgst_amount':         t['sgst_amount'],
+                'cess_amount':         t['cess_amount'],
+                'document_value':      record.get('documentValue'),
+                'filing_status':       record.get('filingStatus'),
+                'push_status':         record.get('pushStatus'),
+                'is_amendment':        record.get('isAmendment'),
+                'itc_eligibility':     record.get('itcEligibility'),
+                'items':               json.dumps(record.get('items') or []),
+                'raw_data':            json.dumps(record),
+                'source_file':         source_file,
+            }
+            values = [row.get(c) for c in columns]
+            try:
+                cur.execute(sql, values)
+                result = cur.fetchone()
+                if result and result[0]:
+                    inserted_count += 1
+                else:
+                    updated_count += 1
+            except Exception as e:
+                logger.error(f"Error upserting purchase record {record.get('documentNumber')}: {e}")
+                raise
+        conn.commit()
+
+    return inserted_count, updated_count
+
+
+# =============================================================================
+# EInvoice table (sales invoices with IRN generated on IRP)
+# =============================================================================
+
+def ensure_einvoice_table_exists(conn) -> None:
+    """Create the einvoice table in the tenant database."""
+    sql = """
+        CREATE TABLE IF NOT EXISTS einvoice (
+            id                      SERIAL PRIMARY KEY,
+            location_gstin          VARCHAR(20) NOT NULL,
+            location_name           VARCHAR(500),
+            document_type           VARCHAR(20),
+            document_number         VARCHAR(100) NOT NULL,
+            document_date           VARCHAR(20)  NOT NULL,
+            transaction_type        VARCHAR(50),
+            buyer_gstin             VARCHAR(20),
+            buyer_legal_name        VARCHAR(500),
+            buyer_trade_name        VARCHAR(500),
+            return_period           INTEGER,
+            pos                     INTEGER,
+            reverse_charge          VARCHAR(5),
+            irn                     VARCHAR(100),
+            irn_generation_date     VARCHAR(50),
+            cancel_date             VARCHAR(50),
+            cancel_reason           VARCHAR(200),
+            taxable_value           DECIMAL(18,2),
+            igst_amount             DECIMAL(18,2),
+            cgst_amount             DECIMAL(18,2),
+            sgst_amount             DECIMAL(18,2),
+            cess_amount             DECIMAL(18,2),
+            document_value          DECIMAL(18,2),
+            filing_status           VARCHAR(50),
+            is_amendment            VARCHAR(5),
+            items                   JSONB,
+            raw_data                JSONB,
+            source_file             VARCHAR(500),
+            stamp                   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            modified_stamp          TIMESTAMP WITH TIME ZONE,
+            CONSTRAINT einvoice_unique_record UNIQUE (document_number, document_date, location_gstin)
+        );
+        CREATE INDEX IF NOT EXISTS idx_einvoice_location_gstin  ON einvoice(location_gstin);
+        CREATE INDEX IF NOT EXISTS idx_einvoice_document_date   ON einvoice(document_date);
+        CREATE INDEX IF NOT EXISTS idx_einvoice_document_number ON einvoice(document_number);
+        CREATE INDEX IF NOT EXISTS idx_einvoice_irn             ON einvoice(irn);
+        CREATE INDEX IF NOT EXISTS idx_einvoice_return_period   ON einvoice(return_period);
+        CREATE INDEX IF NOT EXISTS idx_einvoice_stamp           ON einvoice(stamp);
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql)
+        conn.commit()
+        logger.info("Ensured einvoice table exists")
+
+
+def upsert_einvoice_records(conn, records: List[Dict[str, Any]],
+                             source_file: str) -> Tuple[int, int]:
+    if not records:
+        return 0, 0
+
+    columns = [
+        'location_gstin', 'location_name', 'document_type', 'document_number',
+        'document_date', 'transaction_type', 'buyer_gstin', 'buyer_legal_name',
+        'buyer_trade_name', 'return_period', 'pos', 'reverse_charge', 'irn',
+        'irn_generation_date', 'cancel_date', 'cancel_reason',
+        'taxable_value', 'igst_amount', 'cgst_amount', 'sgst_amount', 'cess_amount',
+        'document_value', 'filing_status', 'is_amendment', 'items', 'raw_data', 'source_file',
+    ]
+    update_cols = [c for c in columns if c not in ('document_number', 'document_date', 'location_gstin')]
+    update_clause = ', '.join(f"{c} = EXCLUDED.{c}" for c in update_cols)
+    update_clause += ", modified_stamp = CURRENT_TIMESTAMP"
+
+    sql = f"""
+        INSERT INTO einvoice ({', '.join(columns)})
+        VALUES ({', '.join(['%s'] * len(columns))})
+        ON CONFLICT (document_number, document_date, location_gstin)
+        DO UPDATE SET {update_clause}
+        RETURNING (xmax = 0) AS is_insert
+    """
+
+    inserted_count = updated_count = 0
+    with conn.cursor() as cur:
+        for record in records:
+            t = _sum_item_taxes(record)
+            row = {
+                'location_gstin':      record.get('locationGstin'),
+                'location_name':       record.get('locationName'),
+                'document_type':       record.get('documentType'),
+                'document_number':     record.get('documentNumber'),
+                'document_date':       record.get('documentDate'),
+                'transaction_type':    record.get('transactionType'),
+                'buyer_gstin':         record.get('billToGstin') or record.get('buyerGstin'),
+                'buyer_legal_name':    record.get('billToLegalName') or record.get('buyerLegalName'),
+                'buyer_trade_name':    record.get('billToTradeName') or record.get('buyerTradeName'),
+                'return_period':       record.get('returnPeriod'),
+                'pos':                 record.get('pos'),
+                'reverse_charge':      record.get('reverseCharge'),
+                'irn':                 record.get('irn'),
+                'irn_generation_date': record.get('irnGenerationDate'),
+                'cancel_date':         record.get('cancelledDate') or record.get('cancelDate'),
+                'cancel_reason':       record.get('cancelReason'),
+                'taxable_value':       t['taxable_value'],
+                'igst_amount':         t['igst_amount'],
+                'cgst_amount':         t['cgst_amount'],
+                'sgst_amount':         t['sgst_amount'],
+                'cess_amount':         t['cess_amount'],
+                'document_value':      record.get('documentValue'),
+                'filing_status':       record.get('filingStatus'),
+                'is_amendment':        record.get('isAmendment'),
+                'items':               json.dumps(record.get('items') or []),
+                'raw_data':            json.dumps(record),
+                'source_file':         source_file,
+            }
+            values = [row.get(c) for c in columns]
+            try:
+                cur.execute(sql, values)
+                result = cur.fetchone()
+                if result and result[0]:
+                    inserted_count += 1
+                else:
+                    updated_count += 1
+            except Exception as e:
+                logger.error(f"Error upserting einvoice record {record.get('documentNumber')}: {e}")
+                raise
+        conn.commit()
+
+    return inserted_count, updated_count
+
+
+# =============================================================================
+# E-Waybill table
+# Completely different schema from invoices — transport/logistics focused.
+# =============================================================================
+
+def ensure_ewaybill_table_exists(conn) -> None:
+    """Create the ewaybill table in the tenant database."""
+    sql = """
+        CREATE TABLE IF NOT EXISTS ewaybill (
+            id                  SERIAL PRIMARY KEY,
+            location_gstin      VARCHAR(20) NOT NULL,
+            ewb_number          VARCHAR(50),
+            ewb_date            VARCHAR(30),
+            ewb_valid_upto      VARCHAR(30),
+            document_number     VARCHAR(100),
+            document_date       VARCHAR(20),
+            document_type       VARCHAR(20),
+            supply_type         VARCHAR(20),
+            sub_supply_type     VARCHAR(50),
+            transaction_type    VARCHAR(50),
+            from_gstin          VARCHAR(20),
+            from_legal_name     VARCHAR(500),
+            from_state_code     INTEGER,
+            to_gstin            VARCHAR(20),
+            to_legal_name       VARCHAR(500),
+            to_state_code       INTEGER,
+            transporter_id      VARCHAR(50),
+            transporter_name    VARCHAR(200),
+            transport_mode      VARCHAR(50),
+            vehicle_number      VARCHAR(50),
+            vehicle_type        VARCHAR(50),
+            total_value         DECIMAL(18,2),
+            taxable_value       DECIMAL(18,2),
+            igst_amount         DECIMAL(18,2),
+            cgst_amount         DECIMAL(18,2),
+            sgst_amount         DECIMAL(18,2),
+            cess_amount         DECIMAL(18,2),
+            status              VARCHAR(50),
+            raw_data            JSONB,
+            source_file         VARCHAR(500),
+            stamp               TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            modified_stamp      TIMESTAMP WITH TIME ZONE,
+            CONSTRAINT ewaybill_unique_record UNIQUE (location_gstin, ewb_number)
+        );
+        CREATE INDEX IF NOT EXISTS idx_ewaybill_location_gstin ON ewaybill(location_gstin);
+        CREATE INDEX IF NOT EXISTS idx_ewaybill_ewb_number     ON ewaybill(ewb_number);
+        CREATE INDEX IF NOT EXISTS idx_ewaybill_ewb_date       ON ewaybill(ewb_date);
+        CREATE INDEX IF NOT EXISTS idx_ewaybill_from_gstin     ON ewaybill(from_gstin);
+        CREATE INDEX IF NOT EXISTS idx_ewaybill_to_gstin       ON ewaybill(to_gstin);
+        CREATE INDEX IF NOT EXISTS idx_ewaybill_stamp          ON ewaybill(stamp);
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql)
+        conn.commit()
+        logger.info("Ensured ewaybill table exists")
+
+
+def upsert_ewaybill_records(conn, records: List[Dict[str, Any]],
+                             source_file: str) -> Tuple[int, int]:
+    if not records:
+        return 0, 0
+
+    columns = [
+        'location_gstin', 'ewb_number', 'ewb_date', 'ewb_valid_upto',
+        'document_number', 'document_date', 'document_type',
+        'supply_type', 'sub_supply_type', 'transaction_type',
+        'from_gstin', 'from_legal_name', 'from_state_code',
+        'to_gstin', 'to_legal_name', 'to_state_code',
+        'transporter_id', 'transporter_name', 'transport_mode',
+        'vehicle_number', 'vehicle_type',
+        'total_value', 'taxable_value', 'igst_amount', 'cgst_amount',
+        'sgst_amount', 'cess_amount', 'status', 'raw_data', 'source_file',
+    ]
+    update_cols = [c for c in columns if c not in ('location_gstin', 'ewb_number')]
+    update_clause = ', '.join(f"{c} = EXCLUDED.{c}" for c in update_cols)
+    update_clause += ", modified_stamp = CURRENT_TIMESTAMP"
+
+    sql = f"""
+        INSERT INTO ewaybill ({', '.join(columns)})
+        VALUES ({', '.join(['%s'] * len(columns))})
+        ON CONFLICT (location_gstin, ewb_number)
+        DO UPDATE SET {update_clause}
+        RETURNING (xmax = 0) AS is_insert
+    """
+
+    inserted_count = updated_count = 0
+    with conn.cursor() as cur:
+        for record in records:
+            t = _sum_item_taxes(record)
+            ewb_num = str(
+                record.get('ewbNumber') or record.get('eWBNumber') or
+                record.get('ewbNo') or record.get('eWBNo') or ''
+            )
+            if not ewb_num:
+                logger.warning("Skipping ewaybill record with no ewb_number")
+                continue
+            row = {
+                'location_gstin':   record.get('locationGstin'),
+                'ewb_number':       ewb_num,
+                'ewb_date':         record.get('ewbDate') or record.get('eWBDate'),
+                'ewb_valid_upto':   record.get('ewbValidUpto') or record.get('validUpto'),
+                'document_number':  record.get('documentNumber'),
+                'document_date':    record.get('documentDate'),
+                'document_type':    record.get('documentType'),
+                'supply_type':      record.get('supplyType'),
+                'sub_supply_type':  record.get('subSupplyType'),
+                'transaction_type': record.get('transactionType'),
+                'from_gstin':       record.get('fromGstin') or record.get('billFromGstin'),
+                'from_legal_name':  record.get('fromLegalName') or record.get('billFromLegalName'),
+                'from_state_code':  record.get('fromStateCode') or record.get('billFromStateCode'),
+                'to_gstin':         record.get('toGstin') or record.get('billToGstin'),
+                'to_legal_name':    record.get('toLegalName') or record.get('billToLegalName'),
+                'to_state_code':    record.get('toStateCode') or record.get('billToStateCode'),
+                'transporter_id':   record.get('transporterId') or record.get('transId'),
+                'transporter_name': record.get('transporterName') or record.get('transName'),
+                'transport_mode':   record.get('transportMode') or record.get('transMode'),
+                'vehicle_number':   record.get('vehicleNumber') or record.get('vehicleNo'),
+                'vehicle_type':     record.get('vehicleType'),
+                'total_value':      record.get('totalValue') or record.get('documentValue'),
+                'taxable_value':    t['taxable_value'] or record.get('taxableValue'),
+                'igst_amount':      t['igst_amount'] or record.get('igstAmount'),
+                'cgst_amount':      t['cgst_amount'] or record.get('cgstAmount'),
+                'sgst_amount':      t['sgst_amount'] or record.get('sgstAmount'),
+                'cess_amount':      t['cess_amount'] or record.get('cessAmount'),
+                'status':           record.get('status') or record.get('ewbStatus'),
+                'raw_data':         json.dumps(record),
+                'source_file':      source_file,
+            }
+            values = [row.get(c) for c in columns]
+            try:
+                cur.execute(sql, values)
+                result = cur.fetchone()
+                if result and result[0]:
+                    inserted_count += 1
+                else:
+                    updated_count += 1
+            except Exception as e:
+                logger.error(f"Error upserting ewaybill record {ewb_num}: {e}")
+                raise
+        conn.commit()
+
+    return inserted_count, updated_count
+
+
+# =============================================================================
+# Credit Note table
+# =============================================================================
+
+def ensure_creditnote_table_exists(conn) -> None:
+    """Create the creditnote table in the tenant database."""
+    sql = """
+        CREATE TABLE IF NOT EXISTS creditnote (
+            id                          SERIAL PRIMARY KEY,
+            location_gstin              VARCHAR(20) NOT NULL,
+            location_name               VARCHAR(500),
+            document_type               VARCHAR(20),
+            document_number             VARCHAR(100) NOT NULL,
+            document_date               VARCHAR(20)  NOT NULL,
+            transaction_type            VARCHAR(50),
+            original_document_number    VARCHAR(100),
+            original_document_date      VARCHAR(20),
+            credit_note_reason          VARCHAR(200),
+            buyer_gstin                 VARCHAR(20),
+            buyer_legal_name            VARCHAR(500),
+            buyer_trade_name            VARCHAR(500),
+            return_period               INTEGER,
+            pos                         INTEGER,
+            reverse_charge              VARCHAR(5),
+            irn                         VARCHAR(100),
+            taxable_value               DECIMAL(18,2),
+            igst_amount                 DECIMAL(18,2),
+            cgst_amount                 DECIMAL(18,2),
+            sgst_amount                 DECIMAL(18,2),
+            cess_amount                 DECIMAL(18,2),
+            document_value              DECIMAL(18,2),
+            filing_status               VARCHAR(50),
+            is_amendment                VARCHAR(5),
+            items                       JSONB,
+            raw_data                    JSONB,
+            source_file                 VARCHAR(500),
+            stamp                       TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            modified_stamp              TIMESTAMP WITH TIME ZONE,
+            CONSTRAINT creditnote_unique_record UNIQUE (document_number, document_date, location_gstin)
+        );
+        CREATE INDEX IF NOT EXISTS idx_creditnote_location_gstin  ON creditnote(location_gstin);
+        CREATE INDEX IF NOT EXISTS idx_creditnote_document_date   ON creditnote(document_date);
+        CREATE INDEX IF NOT EXISTS idx_creditnote_document_number ON creditnote(document_number);
+        CREATE INDEX IF NOT EXISTS idx_creditnote_buyer_gstin     ON creditnote(buyer_gstin);
+        CREATE INDEX IF NOT EXISTS idx_creditnote_return_period   ON creditnote(return_period);
+        CREATE INDEX IF NOT EXISTS idx_creditnote_stamp           ON creditnote(stamp);
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql)
+        conn.commit()
+        logger.info("Ensured creditnote table exists")
+
+
+def upsert_creditnote_records(conn, records: List[Dict[str, Any]],
+                               source_file: str) -> Tuple[int, int]:
+    if not records:
+        return 0, 0
+
+    columns = [
+        'location_gstin', 'location_name', 'document_type', 'document_number',
+        'document_date', 'transaction_type', 'original_document_number', 'original_document_date',
+        'credit_note_reason', 'buyer_gstin', 'buyer_legal_name', 'buyer_trade_name',
+        'return_period', 'pos', 'reverse_charge', 'irn',
+        'taxable_value', 'igst_amount', 'cgst_amount', 'sgst_amount', 'cess_amount',
+        'document_value', 'filing_status', 'is_amendment', 'items', 'raw_data', 'source_file',
+    ]
+    update_cols = [c for c in columns if c not in ('document_number', 'document_date', 'location_gstin')]
+    update_clause = ', '.join(f"{c} = EXCLUDED.{c}" for c in update_cols)
+    update_clause += ", modified_stamp = CURRENT_TIMESTAMP"
+
+    sql = f"""
+        INSERT INTO creditnote ({', '.join(columns)})
+        VALUES ({', '.join(['%s'] * len(columns))})
+        ON CONFLICT (document_number, document_date, location_gstin)
+        DO UPDATE SET {update_clause}
+        RETURNING (xmax = 0) AS is_insert
+    """
+
+    inserted_count = updated_count = 0
+    with conn.cursor() as cur:
+        for record in records:
+            t = _sum_item_taxes(record)
+            row = {
+                'location_gstin':           record.get('locationGstin'),
+                'location_name':            record.get('locationName'),
+                'document_type':            record.get('documentType'),
+                'document_number':          record.get('documentNumber'),
+                'document_date':            record.get('documentDate'),
+                'transaction_type':         record.get('transactionType'),
+                'original_document_number': record.get('originalDocumentNumber'),
+                'original_document_date':   record.get('originalDocumentDate'),
+                'credit_note_reason':       record.get('creditNoteReason'),
+                'buyer_gstin':              record.get('billToGstin') or record.get('buyerGstin'),
+                'buyer_legal_name':         record.get('billToLegalName') or record.get('buyerLegalName'),
+                'buyer_trade_name':         record.get('billToTradeName') or record.get('buyerTradeName'),
+                'return_period':            record.get('returnPeriod'),
+                'pos':                      record.get('pos'),
+                'reverse_charge':           record.get('reverseCharge'),
+                'irn':                      record.get('irn'),
+                'taxable_value':            t['taxable_value'],
+                'igst_amount':              t['igst_amount'],
+                'cgst_amount':              t['cgst_amount'],
+                'sgst_amount':              t['sgst_amount'],
+                'cess_amount':              t['cess_amount'],
+                'document_value':           record.get('documentValue'),
+                'filing_status':            record.get('filingStatus'),
+                'is_amendment':             record.get('isAmendment'),
+                'items':                    json.dumps(record.get('items') or []),
+                'raw_data':                 json.dumps(record),
+                'source_file':              source_file,
+            }
+            values = [row.get(c) for c in columns]
+            try:
+                cur.execute(sql, values)
+                result = cur.fetchone()
+                if result and result[0]:
+                    inserted_count += 1
+                else:
+                    updated_count += 1
+            except Exception as e:
+                logger.error(f"Error upserting creditnote record {record.get('documentNumber')}: {e}")
+                raise
+        conn.commit()
+
+    return inserted_count, updated_count
+
+
+# =============================================================================
+# Debit Note table
+# =============================================================================
+
+def ensure_debitnote_table_exists(conn) -> None:
+    """Create the debitnote table in the tenant database."""
+    sql = """
+        CREATE TABLE IF NOT EXISTS debitnote (
+            id                          SERIAL PRIMARY KEY,
+            location_gstin              VARCHAR(20) NOT NULL,
+            location_name               VARCHAR(500),
+            document_type               VARCHAR(20),
+            document_number             VARCHAR(100) NOT NULL,
+            document_date               VARCHAR(20)  NOT NULL,
+            transaction_type            VARCHAR(50),
+            original_document_number    VARCHAR(100),
+            original_document_date      VARCHAR(20),
+            buyer_gstin                 VARCHAR(20),
+            buyer_legal_name            VARCHAR(500),
+            buyer_trade_name            VARCHAR(500),
+            return_period               INTEGER,
+            pos                         INTEGER,
+            reverse_charge              VARCHAR(5),
+            irn                         VARCHAR(100),
+            taxable_value               DECIMAL(18,2),
+            igst_amount                 DECIMAL(18,2),
+            cgst_amount                 DECIMAL(18,2),
+            sgst_amount                 DECIMAL(18,2),
+            cess_amount                 DECIMAL(18,2),
+            document_value              DECIMAL(18,2),
+            filing_status               VARCHAR(50),
+            is_amendment                VARCHAR(5),
+            items                       JSONB,
+            raw_data                    JSONB,
+            source_file                 VARCHAR(500),
+            stamp                       TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            modified_stamp              TIMESTAMP WITH TIME ZONE,
+            CONSTRAINT debitnote_unique_record UNIQUE (document_number, document_date, location_gstin)
+        );
+        CREATE INDEX IF NOT EXISTS idx_debitnote_location_gstin  ON debitnote(location_gstin);
+        CREATE INDEX IF NOT EXISTS idx_debitnote_document_date   ON debitnote(document_date);
+        CREATE INDEX IF NOT EXISTS idx_debitnote_document_number ON debitnote(document_number);
+        CREATE INDEX IF NOT EXISTS idx_debitnote_buyer_gstin     ON debitnote(buyer_gstin);
+        CREATE INDEX IF NOT EXISTS idx_debitnote_return_period   ON debitnote(return_period);
+        CREATE INDEX IF NOT EXISTS idx_debitnote_stamp           ON debitnote(stamp);
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql)
+        conn.commit()
+        logger.info("Ensured debitnote table exists")
+
+
+def upsert_debitnote_records(conn, records: List[Dict[str, Any]],
+                              source_file: str) -> Tuple[int, int]:
+    if not records:
+        return 0, 0
+
+    columns = [
+        'location_gstin', 'location_name', 'document_type', 'document_number',
+        'document_date', 'transaction_type', 'original_document_number', 'original_document_date',
+        'buyer_gstin', 'buyer_legal_name', 'buyer_trade_name',
+        'return_period', 'pos', 'reverse_charge', 'irn',
+        'taxable_value', 'igst_amount', 'cgst_amount', 'sgst_amount', 'cess_amount',
+        'document_value', 'filing_status', 'is_amendment', 'items', 'raw_data', 'source_file',
+    ]
+    update_cols = [c for c in columns if c not in ('document_number', 'document_date', 'location_gstin')]
+    update_clause = ', '.join(f"{c} = EXCLUDED.{c}" for c in update_cols)
+    update_clause += ", modified_stamp = CURRENT_TIMESTAMP"
+
+    sql = f"""
+        INSERT INTO debitnote ({', '.join(columns)})
+        VALUES ({', '.join(['%s'] * len(columns))})
+        ON CONFLICT (document_number, document_date, location_gstin)
+        DO UPDATE SET {update_clause}
+        RETURNING (xmax = 0) AS is_insert
+    """
+
+    inserted_count = updated_count = 0
+    with conn.cursor() as cur:
+        for record in records:
+            t = _sum_item_taxes(record)
+            row = {
+                'location_gstin':           record.get('locationGstin'),
+                'location_name':            record.get('locationName'),
+                'document_type':            record.get('documentType'),
+                'document_number':          record.get('documentNumber'),
+                'document_date':            record.get('documentDate'),
+                'transaction_type':         record.get('transactionType'),
+                'original_document_number': record.get('originalDocumentNumber'),
+                'original_document_date':   record.get('originalDocumentDate'),
+                'buyer_gstin':              record.get('billToGstin') or record.get('buyerGstin'),
+                'buyer_legal_name':         record.get('billToLegalName') or record.get('buyerLegalName'),
+                'buyer_trade_name':         record.get('billToTradeName') or record.get('buyerTradeName'),
+                'return_period':            record.get('returnPeriod'),
+                'pos':                      record.get('pos'),
+                'reverse_charge':           record.get('reverseCharge'),
+                'irn':                      record.get('irn'),
+                'taxable_value':            t['taxable_value'],
+                'igst_amount':              t['igst_amount'],
+                'cgst_amount':              t['cgst_amount'],
+                'sgst_amount':              t['sgst_amount'],
+                'cess_amount':              t['cess_amount'],
+                'document_value':           record.get('documentValue'),
+                'filing_status':            record.get('filingStatus'),
+                'is_amendment':             record.get('isAmendment'),
+                'items':                    json.dumps(record.get('items') or []),
+                'raw_data':                 json.dumps(record),
+                'source_file':              source_file,
+            }
+            values = [row.get(c) for c in columns]
+            try:
+                cur.execute(sql, values)
+                result = cur.fetchone()
+                if result and result[0]:
+                    inserted_count += 1
+                else:
+                    updated_count += 1
+            except Exception as e:
+                logger.error(f"Error upserting debitnote record {record.get('documentNumber')}: {e}")
+                raise
+        conn.commit()
+
+    return inserted_count, updated_count
+
+
+# =============================================================================
+# EInv Generated table (eInvoices generated by suppliers, received by this entity)
+# =============================================================================
+
+def ensure_einv_generated_table_exists(conn) -> None:
+    """Create the einv_generated table in the tenant database."""
+    sql = """
+        CREATE TABLE IF NOT EXISTS einv_generated (
+            id                      SERIAL PRIMARY KEY,
+            location_gstin          VARCHAR(20) NOT NULL,
+            location_name           VARCHAR(500),
+            document_type           VARCHAR(20),
+            document_number         VARCHAR(100) NOT NULL,
+            document_date           VARCHAR(20)  NOT NULL,
+            transaction_type        VARCHAR(50),
+            supplier_gstin          VARCHAR(20),
+            supplier_legal_name     VARCHAR(500),
+            supplier_trade_name     VARCHAR(500),
+            return_period           INTEGER,
+            pos                     INTEGER,
+            reverse_charge          VARCHAR(5),
+            irn                     VARCHAR(100),
+            irn_generation_date     VARCHAR(50),
+            cancel_date             VARCHAR(50),
+            taxable_value           DECIMAL(18,2),
+            igst_amount             DECIMAL(18,2),
+            cgst_amount             DECIMAL(18,2),
+            sgst_amount             DECIMAL(18,2),
+            cess_amount             DECIMAL(18,2),
+            document_value          DECIMAL(18,2),
+            itc_eligibility         VARCHAR(50),
+            items                   JSONB,
+            raw_data                JSONB,
+            source_file             VARCHAR(500),
+            stamp                   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            modified_stamp          TIMESTAMP WITH TIME ZONE,
+            CONSTRAINT einv_generated_unique_record UNIQUE (document_number, document_date, location_gstin)
+        );
+        CREATE INDEX IF NOT EXISTS idx_einv_generated_location_gstin  ON einv_generated(location_gstin);
+        CREATE INDEX IF NOT EXISTS idx_einv_generated_document_date   ON einv_generated(document_date);
+        CREATE INDEX IF NOT EXISTS idx_einv_generated_document_number ON einv_generated(document_number);
+        CREATE INDEX IF NOT EXISTS idx_einv_generated_supplier_gstin  ON einv_generated(supplier_gstin);
+        CREATE INDEX IF NOT EXISTS idx_einv_generated_irn             ON einv_generated(irn);
+        CREATE INDEX IF NOT EXISTS idx_einv_generated_return_period   ON einv_generated(return_period);
+        CREATE INDEX IF NOT EXISTS idx_einv_generated_stamp           ON einv_generated(stamp);
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql)
+        conn.commit()
+        logger.info("Ensured einv_generated table exists")
+
+
+def upsert_einv_generated_records(conn, records: List[Dict[str, Any]],
+                                   source_file: str) -> Tuple[int, int]:
+    if not records:
+        return 0, 0
+
+    columns = [
+        'location_gstin', 'location_name', 'document_type', 'document_number',
+        'document_date', 'transaction_type', 'supplier_gstin', 'supplier_legal_name',
+        'supplier_trade_name', 'return_period', 'pos', 'reverse_charge', 'irn',
+        'irn_generation_date', 'cancel_date',
+        'taxable_value', 'igst_amount', 'cgst_amount', 'sgst_amount', 'cess_amount',
+        'document_value', 'itc_eligibility', 'items', 'raw_data', 'source_file',
+    ]
+    update_cols = [c for c in columns if c not in ('document_number', 'document_date', 'location_gstin')]
+    update_clause = ', '.join(f"{c} = EXCLUDED.{c}" for c in update_cols)
+    update_clause += ", modified_stamp = CURRENT_TIMESTAMP"
+
+    sql = f"""
+        INSERT INTO einv_generated ({', '.join(columns)})
+        VALUES ({', '.join(['%s'] * len(columns))})
+        ON CONFLICT (document_number, document_date, location_gstin)
+        DO UPDATE SET {update_clause}
+        RETURNING (xmax = 0) AS is_insert
+    """
+
+    inserted_count = updated_count = 0
+    with conn.cursor() as cur:
+        for record in records:
+            t = _sum_item_taxes(record)
+            row = {
+                'location_gstin':      record.get('locationGstin'),
+                'location_name':       record.get('locationName'),
+                'document_type':       record.get('documentType'),
+                'document_number':     record.get('documentNumber'),
+                'document_date':       record.get('documentDate'),
+                'transaction_type':    record.get('transactionType'),
+                'supplier_gstin':      record.get('billFromGstin') or record.get('supplierGstin'),
+                'supplier_legal_name': record.get('billFromLegalName') or record.get('supplierLegalName'),
+                'supplier_trade_name': record.get('billFromTradeName') or record.get('supplierTradeName'),
+                'return_period':       record.get('returnPeriod'),
+                'pos':                 record.get('pos'),
+                'reverse_charge':      record.get('reverseCharge'),
+                'irn':                 record.get('irn'),
+                'irn_generation_date': record.get('irnGenerationDate'),
+                'cancel_date':         record.get('cancelledDate') or record.get('cancelDate'),
+                'taxable_value':       t['taxable_value'],
+                'igst_amount':         t['igst_amount'],
+                'cgst_amount':         t['cgst_amount'],
+                'sgst_amount':         t['sgst_amount'],
+                'cess_amount':         t['cess_amount'],
+                'document_value':      record.get('documentValue'),
+                'itc_eligibility':     record.get('itcEligibility'),
+                'items':               json.dumps(record.get('items') or []),
+                'raw_data':            json.dumps(record),
+                'source_file':         source_file,
+            }
+            values = [row.get(c) for c in columns]
+            try:
+                cur.execute(sql, values)
+                result = cur.fetchone()
+                if result and result[0]:
+                    inserted_count += 1
+                else:
+                    updated_count += 1
+            except Exception as e:
+                logger.error(f"Error upserting einv_generated record {record.get('documentNumber')}: {e}")
+                raise
+        conn.commit()
+
+    return inserted_count, updated_count
+
+
+# =============================================================================
+# Sales Auto Draft table (auto-drafted sales from GSTR-2B counter-party data)
+# =============================================================================
+
+def ensure_sales_auto_draft_table_exists(conn) -> None:
+    """Create the sales_auto_draft table in the tenant database."""
+    sql = """
+        CREATE TABLE IF NOT EXISTS sales_auto_draft (
+            id                      SERIAL PRIMARY KEY,
+            location_gstin          VARCHAR(20) NOT NULL,
+            location_name           VARCHAR(500),
+            document_type           VARCHAR(20),
+            document_number         VARCHAR(100) NOT NULL,
+            document_date           VARCHAR(20)  NOT NULL,
+            transaction_type        VARCHAR(50),
+            buyer_gstin             VARCHAR(20),
+            buyer_legal_name        VARCHAR(500),
+            buyer_trade_name        VARCHAR(500),
+            return_period           INTEGER,
+            pos                     INTEGER,
+            reverse_charge          VARCHAR(5),
+            irn                     VARCHAR(100),
+            taxable_value           DECIMAL(18,2),
+            igst_amount             DECIMAL(18,2),
+            cgst_amount             DECIMAL(18,2),
+            sgst_amount             DECIMAL(18,2),
+            cess_amount             DECIMAL(18,2),
+            document_value          DECIMAL(18,2),
+            auto_draft_source       VARCHAR(100),
+            filing_status           VARCHAR(50),
+            items                   JSONB,
+            raw_data                JSONB,
+            source_file             VARCHAR(500),
+            stamp                   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            modified_stamp          TIMESTAMP WITH TIME ZONE,
+            CONSTRAINT sales_auto_draft_unique_record UNIQUE (document_number, document_date, location_gstin)
+        );
+        CREATE INDEX IF NOT EXISTS idx_sales_auto_draft_location_gstin  ON sales_auto_draft(location_gstin);
+        CREATE INDEX IF NOT EXISTS idx_sales_auto_draft_document_date   ON sales_auto_draft(document_date);
+        CREATE INDEX IF NOT EXISTS idx_sales_auto_draft_document_number ON sales_auto_draft(document_number);
+        CREATE INDEX IF NOT EXISTS idx_sales_auto_draft_buyer_gstin     ON sales_auto_draft(buyer_gstin);
+        CREATE INDEX IF NOT EXISTS idx_sales_auto_draft_return_period   ON sales_auto_draft(return_period);
+        CREATE INDEX IF NOT EXISTS idx_sales_auto_draft_stamp           ON sales_auto_draft(stamp);
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql)
+        conn.commit()
+        logger.info("Ensured sales_auto_draft table exists")
+
+
+def upsert_sales_auto_draft_records(conn, records: List[Dict[str, Any]],
+                                     source_file: str) -> Tuple[int, int]:
+    if not records:
+        return 0, 0
+
+    columns = [
+        'location_gstin', 'location_name', 'document_type', 'document_number',
+        'document_date', 'transaction_type', 'buyer_gstin', 'buyer_legal_name',
+        'buyer_trade_name', 'return_period', 'pos', 'reverse_charge', 'irn',
+        'taxable_value', 'igst_amount', 'cgst_amount', 'sgst_amount', 'cess_amount',
+        'document_value', 'auto_draft_source', 'filing_status',
+        'items', 'raw_data', 'source_file',
+    ]
+    update_cols = [c for c in columns if c not in ('document_number', 'document_date', 'location_gstin')]
+    update_clause = ', '.join(f"{c} = EXCLUDED.{c}" for c in update_cols)
+    update_clause += ", modified_stamp = CURRENT_TIMESTAMP"
+
+    sql = f"""
+        INSERT INTO sales_auto_draft ({', '.join(columns)})
+        VALUES ({', '.join(['%s'] * len(columns))})
+        ON CONFLICT (document_number, document_date, location_gstin)
+        DO UPDATE SET {update_clause}
+        RETURNING (xmax = 0) AS is_insert
+    """
+
+    inserted_count = updated_count = 0
+    with conn.cursor() as cur:
+        for record in records:
+            t = _sum_item_taxes(record)
+            row = {
+                'location_gstin':    record.get('locationGstin'),
+                'location_name':     record.get('locationName'),
+                'document_type':     record.get('documentType'),
+                'document_number':   record.get('documentNumber'),
+                'document_date':     record.get('documentDate'),
+                'transaction_type':  record.get('transactionType'),
+                'buyer_gstin':       record.get('billToGstin') or record.get('buyerGstin'),
+                'buyer_legal_name':  record.get('billToLegalName') or record.get('buyerLegalName'),
+                'buyer_trade_name':  record.get('billToTradeName') or record.get('buyerTradeName'),
+                'return_period':     record.get('returnPeriod'),
+                'pos':               record.get('pos'),
+                'reverse_charge':    record.get('reverseCharge'),
+                'irn':               record.get('irn'),
+                'taxable_value':     t['taxable_value'],
+                'igst_amount':       t['igst_amount'],
+                'cgst_amount':       t['cgst_amount'],
+                'sgst_amount':       t['sgst_amount'],
+                'cess_amount':       t['cess_amount'],
+                'document_value':    record.get('documentValue'),
+                'auto_draft_source': record.get('autoDraftSource'),
+                'filing_status':     record.get('filingStatus'),
+                'items':             json.dumps(record.get('items') or []),
+                'raw_data':          json.dumps(record),
+                'source_file':       source_file,
+            }
+            values = [row.get(c) for c in columns]
+            try:
+                cur.execute(sql, values)
+                result = cur.fetchone()
+                if result and result[0]:
+                    inserted_count += 1
+                else:
+                    updated_count += 1
+            except Exception as e:
+                logger.error(f"Error upserting sales_auto_draft record {record.get('documentNumber')}: {e}")
+                raise
+        conn.commit()
+
+    return inserted_count, updated_count
+
+
+# =============================================================================
+# GSTR2B table
+# =============================================================================
+
+def ensure_gstr2b_table_exists(conn) -> None:
+    """Create the gstr2b table in the tenant database."""
+    sql = """
+        CREATE TABLE IF NOT EXISTS gstr2b (
+            id                  SERIAL PRIMARY KEY,
+            location_gstin      VARCHAR(20) NOT NULL,
+            supplier_gstin      VARCHAR(20),
+            supplier_name       VARCHAR(500),
+            document_type       VARCHAR(20),
+            document_number     VARCHAR(100) NOT NULL,
+            document_date       VARCHAR(20)  NOT NULL,
+            return_period       INTEGER,
+            filing_date         VARCHAR(20),
+            itc_eligibility     VARCHAR(50),
+            place_of_supply     INTEGER,
+            reverse_charge      VARCHAR(5),
+            irn                 VARCHAR(100),
+            taxable_value       DECIMAL(18,2),
+            igst_amount         DECIMAL(18,2),
+            cgst_amount         DECIMAL(18,2),
+            sgst_amount         DECIMAL(18,2),
+            cess_amount         DECIMAL(18,2),
+            match_status        VARCHAR(50),
+            raw_data            JSONB,
+            source_file         VARCHAR(500),
+            stamp               TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            modified_stamp      TIMESTAMP WITH TIME ZONE,
+            CONSTRAINT gstr2b_unique_record
+                UNIQUE (document_number, document_date, location_gstin, supplier_gstin)
+        );
+        CREATE INDEX IF NOT EXISTS idx_gstr2b_location_gstin  ON gstr2b(location_gstin);
+        CREATE INDEX IF NOT EXISTS idx_gstr2b_supplier_gstin  ON gstr2b(supplier_gstin);
+        CREATE INDEX IF NOT EXISTS idx_gstr2b_document_date   ON gstr2b(document_date);
+        CREATE INDEX IF NOT EXISTS idx_gstr2b_return_period   ON gstr2b(return_period);
+        CREATE INDEX IF NOT EXISTS idx_gstr2b_stamp           ON gstr2b(stamp);
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql)
+        conn.commit()
+        logger.info("Ensured gstr2b table exists")
+
+
+def _flatten_gstr2b_record(record: Dict[str, Any], source_file: str) -> Dict[str, Any]:
+    return {
+        'location_gstin':  record.get('locationGstin'),
+        'supplier_gstin':  record.get('supplierGstin') or record.get('counterPartyGstin'),
+        'supplier_name':   (record.get('supplierLegalName')
+                            or record.get('supplierTradeName')
+                            or record.get('supplierName')),
+        'document_type':   record.get('documentType'),
+        'document_number': record.get('documentNumber'),
+        'document_date':   record.get('documentDate'),
+        'return_period':   record.get('returnPeriod'),
+        'filing_date':     record.get('filingDate') or record.get('filedDate'),
+        'itc_eligibility': record.get('itcEligibility') or record.get('itcAvailability'),
+        'place_of_supply': record.get('placeOfSupply') or record.get('pos'),
+        'reverse_charge':  record.get('reverseCharge'),
+        'irn':             record.get('irn'),
+        'taxable_value':   record.get('taxableValue'),
+        'igst_amount':     record.get('igstAmount'),
+        'cgst_amount':     record.get('cgstAmount'),
+        'sgst_amount':     record.get('sgstAmount'),
+        'cess_amount':     record.get('cessAmount'),
+        'match_status':    record.get('matchStatus') or record.get('reconStatus'),
+        'raw_data':        json.dumps(record),
+        'source_file':     source_file,
+    }
+
+
+def upsert_gstr2b_records(conn, records: List[Dict[str, Any]],
+                           source_file: str) -> Tuple[int, int]:
+    if not records:
+        return 0, 0
+
+    columns = [
+        'location_gstin', 'supplier_gstin', 'supplier_name', 'document_type',
+        'document_number', 'document_date', 'return_period', 'filing_date',
+        'itc_eligibility', 'place_of_supply', 'reverse_charge', 'irn',
+        'taxable_value', 'igst_amount', 'cgst_amount', 'sgst_amount', 'cess_amount',
+        'match_status', 'raw_data', 'source_file',
+    ]
+    update_cols = [c for c in columns
+                   if c not in ('document_number', 'document_date', 'location_gstin', 'supplier_gstin')]
+    update_clause = ', '.join(f"{c} = EXCLUDED.{c}" for c in update_cols)
+    update_clause += ", modified_stamp = CURRENT_TIMESTAMP"
+
+    sql = f"""
+        INSERT INTO gstr2b ({', '.join(columns)})
+        VALUES ({', '.join(['%s'] * len(columns))})
+        ON CONFLICT (document_number, document_date, location_gstin, supplier_gstin)
+        DO UPDATE SET {update_clause}
+        RETURNING (xmax = 0) AS is_insert
+    """
+
+    inserted_count = updated_count = 0
+    with conn.cursor() as cur:
+        for record in records:
+            row = _flatten_gstr2b_record(record, source_file)
+            values = [row.get(c) for c in columns]
+            try:
+                cur.execute(sql, values)
+                result = cur.fetchone()
+                if result and result[0]:
+                    inserted_count += 1
+                else:
+                    updated_count += 1
+            except Exception as e:
+                logger.error(f"Error upserting gstr2b record {record.get('documentNumber')}: {e}")
+                raise
+        conn.commit()
+
+    return inserted_count, updated_count
+
+
+# =============================================================================
+# 3-Way Reconciliation table  (covers recon_sales_autodraft + recon_sales_einv)
+# =============================================================================
+
+def ensure_recon_3way_table_exists(conn) -> None:
+    """Create the recon_3way table (3-way reconciliation: sales vs GSTR1 vs autodraft/eInvoice)."""
+    sql = """
+        CREATE TABLE IF NOT EXISTS recon_3way (
+            id                      SERIAL PRIMARY KEY,
+            location_gstin          VARCHAR(20) NOT NULL,
+            recon_type              VARCHAR(50) NOT NULL,
+            document_number         VARCHAR(100),
+            document_date           VARCHAR(20),
+            document_type           VARCHAR(20),
+            return_period           INTEGER,
+            match_status            VARCHAR(50),
+            book_taxable_value      DECIMAL(18,2),
+            book_igst               DECIMAL(18,2),
+            book_cgst               DECIMAL(18,2),
+            book_sgst               DECIMAL(18,2),
+            book_cess               DECIMAL(18,2),
+            portal_taxable_value    DECIMAL(18,2),
+            portal_igst             DECIMAL(18,2),
+            portal_cgst             DECIMAL(18,2),
+            portal_sgst             DECIMAL(18,2),
+            portal_cess             DECIMAL(18,2),
+            diff_taxable_value      DECIMAL(18,2),
+            diff_igst               DECIMAL(18,2),
+            diff_cgst               DECIMAL(18,2),
+            diff_sgst               DECIMAL(18,2),
+            diff_cess               DECIMAL(18,2),
+            raw_data                JSONB,
+            source_file             VARCHAR(500),
+            stamp                   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            modified_stamp          TIMESTAMP WITH TIME ZONE,
+            CONSTRAINT recon_3way_unique
+                UNIQUE (location_gstin, document_number, document_date, recon_type)
+        );
+        CREATE INDEX IF NOT EXISTS idx_recon_3way_location_gstin ON recon_3way(location_gstin);
+        CREATE INDEX IF NOT EXISTS idx_recon_3way_document_date  ON recon_3way(document_date);
+        CREATE INDEX IF NOT EXISTS idx_recon_3way_match_status   ON recon_3way(match_status);
+        CREATE INDEX IF NOT EXISTS idx_recon_3way_recon_type     ON recon_3way(recon_type);
+        CREATE INDEX IF NOT EXISTS idx_recon_3way_stamp          ON recon_3way(stamp);
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql)
+        conn.commit()
+        logger.info("Ensured recon_3way table exists")
+
+
+def upsert_recon_3way_records(conn, records: List[Dict[str, Any]],
+                               source_file: str, recon_type: str) -> Tuple[int, int]:
+    if not records:
+        return 0, 0
+
+    columns = [
+        'location_gstin', 'recon_type', 'document_number', 'document_date', 'document_type',
+        'return_period', 'match_status',
+        'book_taxable_value', 'book_igst', 'book_cgst', 'book_sgst', 'book_cess',
+        'portal_taxable_value', 'portal_igst', 'portal_cgst', 'portal_sgst', 'portal_cess',
+        'diff_taxable_value', 'diff_igst', 'diff_cgst', 'diff_sgst', 'diff_cess',
+        'raw_data', 'source_file',
+    ]
+    update_cols = [c for c in columns
+                   if c not in ('location_gstin', 'document_number', 'document_date', 'recon_type')]
+    update_clause = ', '.join(f"{c} = EXCLUDED.{c}" for c in update_cols)
+    update_clause += ", modified_stamp = CURRENT_TIMESTAMP"
+
+    sql = f"""
+        INSERT INTO recon_3way ({', '.join(columns)})
+        VALUES ({', '.join(['%s'] * len(columns))})
+        ON CONFLICT (location_gstin, document_number, document_date, recon_type)
+        DO UPDATE SET {update_clause}
+        RETURNING (xmax = 0) AS is_insert
+    """
+
+    inserted_count = updated_count = 0
+    with conn.cursor() as cur:
+        for record in records:
+            row = {
+                'location_gstin':       record.get('locationGstin'),
+                'recon_type':           recon_type,
+                'document_number':      record.get('documentNumber'),
+                'document_date':        record.get('documentDate'),
+                'document_type':        record.get('documentType'),
+                'return_period':        record.get('returnPeriod'),
+                'match_status':         record.get('matchStatus') or record.get('reconStatus'),
+                'book_taxable_value':   record.get('bookTaxableValue') or record.get('salesTaxableValue'),
+                'book_igst':            record.get('bookIgst') or record.get('salesIgst'),
+                'book_cgst':            record.get('bookCgst') or record.get('salesCgst'),
+                'book_sgst':            record.get('bookSgst') or record.get('salesSgst'),
+                'book_cess':            record.get('bookCess') or record.get('salesCess'),
+                'portal_taxable_value': record.get('gstr1TaxableValue') or record.get('portalTaxableValue'),
+                'portal_igst':          record.get('gstr1Igst') or record.get('portalIgst'),
+                'portal_cgst':          record.get('gstr1Cgst') or record.get('portalCgst'),
+                'portal_sgst':          record.get('gstr1Sgst') or record.get('portalSgst'),
+                'portal_cess':          record.get('gstr1Cess') or record.get('portalCess'),
+                'diff_taxable_value':   record.get('diffTaxableValue'),
+                'diff_igst':            record.get('diffIgst'),
+                'diff_cgst':            record.get('diffCgst'),
+                'diff_sgst':            record.get('diffSgst'),
+                'diff_cess':            record.get('diffCess'),
+                'raw_data':             json.dumps(record),
+                'source_file':          source_file,
+            }
+            values = [row.get(c) for c in columns]
+            try:
+                cur.execute(sql, values)
+                result = cur.fetchone()
+                if result and result[0]:
+                    inserted_count += 1
+                else:
+                    updated_count += 1
+            except Exception as e:
+                logger.error(f"Error upserting recon_3way record {record.get('documentNumber')}: {e}")
+                raise
+        conn.commit()
+
+    return inserted_count, updated_count
+
+
+# =============================================================================
+# 2B vs Purchase Register Reconciliation table
+# =============================================================================
+
+def ensure_recon_2b_pr_table_exists(conn) -> None:
+    """Create the recon_2b_pr table."""
+    sql = """
+        CREATE TABLE IF NOT EXISTS recon_2b_pr (
+            id                      SERIAL PRIMARY KEY,
+            location_gstin          VARCHAR(20) NOT NULL,
+            supplier_gstin          VARCHAR(20),
+            document_type           VARCHAR(20),
+            document_number         VARCHAR(100),
+            document_date           VARCHAR(20),
+            return_period           INTEGER,
+            match_status            VARCHAR(50),
+            pr_taxable_value        DECIMAL(18,2),
+            pr_igst                 DECIMAL(18,2),
+            pr_cgst                 DECIMAL(18,2),
+            pr_sgst                 DECIMAL(18,2),
+            pr_cess                 DECIMAL(18,2),
+            gstr2b_taxable_value    DECIMAL(18,2),
+            gstr2b_igst             DECIMAL(18,2),
+            gstr2b_cgst             DECIMAL(18,2),
+            gstr2b_sgst             DECIMAL(18,2),
+            gstr2b_cess             DECIMAL(18,2),
+            diff_taxable_value      DECIMAL(18,2),
+            diff_igst               DECIMAL(18,2),
+            diff_cgst               DECIMAL(18,2),
+            diff_sgst               DECIMAL(18,2),
+            diff_cess               DECIMAL(18,2),
+            itc_eligibility         VARCHAR(50),
+            raw_data                JSONB,
+            source_file             VARCHAR(500),
+            stamp                   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            modified_stamp          TIMESTAMP WITH TIME ZONE,
+            CONSTRAINT recon_2b_pr_unique
+                UNIQUE (location_gstin, supplier_gstin, document_number, document_date)
+        );
+        CREATE INDEX IF NOT EXISTS idx_recon_2b_pr_location_gstin ON recon_2b_pr(location_gstin);
+        CREATE INDEX IF NOT EXISTS idx_recon_2b_pr_supplier_gstin ON recon_2b_pr(supplier_gstin);
+        CREATE INDEX IF NOT EXISTS idx_recon_2b_pr_document_date  ON recon_2b_pr(document_date);
+        CREATE INDEX IF NOT EXISTS idx_recon_2b_pr_match_status   ON recon_2b_pr(match_status);
+        CREATE INDEX IF NOT EXISTS idx_recon_2b_pr_stamp          ON recon_2b_pr(stamp);
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql)
+        conn.commit()
+        logger.info("Ensured recon_2b_pr table exists")
+
+
+def upsert_recon_2b_pr_records(conn, records: List[Dict[str, Any]],
+                                source_file: str) -> Tuple[int, int]:
+    if not records:
+        return 0, 0
+
+    columns = [
+        'location_gstin', 'supplier_gstin', 'document_type', 'document_number', 'document_date',
+        'return_period', 'match_status',
+        'pr_taxable_value', 'pr_igst', 'pr_cgst', 'pr_sgst', 'pr_cess',
+        'gstr2b_taxable_value', 'gstr2b_igst', 'gstr2b_cgst', 'gstr2b_sgst', 'gstr2b_cess',
+        'diff_taxable_value', 'diff_igst', 'diff_cgst', 'diff_sgst', 'diff_cess',
+        'itc_eligibility', 'raw_data', 'source_file',
+    ]
+    update_cols = [c for c in columns
+                   if c not in ('location_gstin', 'supplier_gstin', 'document_number', 'document_date')]
+    update_clause = ', '.join(f"{c} = EXCLUDED.{c}" for c in update_cols)
+    update_clause += ", modified_stamp = CURRENT_TIMESTAMP"
+
+    sql = f"""
+        INSERT INTO recon_2b_pr ({', '.join(columns)})
+        VALUES ({', '.join(['%s'] * len(columns))})
+        ON CONFLICT (location_gstin, supplier_gstin, document_number, document_date)
+        DO UPDATE SET {update_clause}
+        RETURNING (xmax = 0) AS is_insert
+    """
+
+    inserted_count = updated_count = 0
+    with conn.cursor() as cur:
+        for record in records:
+            row = {
+                'location_gstin':        record.get('locationGstin'),
+                'supplier_gstin':        record.get('supplierGstin') or record.get('counterPartyGstin'),
+                'document_type':         record.get('documentType'),
+                'document_number':       record.get('documentNumber'),
+                'document_date':         record.get('documentDate'),
+                'return_period':         record.get('returnPeriod'),
+                'match_status':          record.get('matchStatus') or record.get('reconStatus'),
+                'pr_taxable_value':      record.get('prTaxableValue') or record.get('bookTaxableValue'),
+                'pr_igst':               record.get('prIgst') or record.get('bookIgst'),
+                'pr_cgst':               record.get('prCgst') or record.get('bookCgst'),
+                'pr_sgst':               record.get('prSgst') or record.get('bookSgst'),
+                'pr_cess':               record.get('prCess') or record.get('bookCess'),
+                'gstr2b_taxable_value':  record.get('gstr2bTaxableValue') or record.get('portalTaxableValue'),
+                'gstr2b_igst':           record.get('gstr2bIgst') or record.get('portalIgst'),
+                'gstr2b_cgst':           record.get('gstr2bCgst') or record.get('portalCgst'),
+                'gstr2b_sgst':           record.get('gstr2bSgst') or record.get('portalSgst'),
+                'gstr2b_cess':           record.get('gstr2bCess') or record.get('portalCess'),
+                'diff_taxable_value':    record.get('diffTaxableValue'),
+                'diff_igst':             record.get('diffIgst'),
+                'diff_cgst':             record.get('diffCgst'),
+                'diff_sgst':             record.get('diffSgst'),
+                'diff_cess':             record.get('diffCess'),
+                'itc_eligibility':       record.get('itcEligibility') or record.get('itcAvailability'),
+                'raw_data':              json.dumps(record),
+                'source_file':           source_file,
+            }
+            values = [row.get(c) for c in columns]
+            try:
+                cur.execute(sql, values)
+                result = cur.fetchone()
+                if result and result[0]:
+                    inserted_count += 1
+                else:
+                    updated_count += 1
+            except Exception as e:
+                logger.error(f"Error upserting recon_2b_pr record {record.get('documentNumber')}: {e}")
+                raise
+        conn.commit()
+
+    return inserted_count, updated_count
+
+
+# =============================================================================
+# Location Master table
+# =============================================================================
+
+def ensure_location_master_table_exists(conn) -> None:
+    """Create the location_master table in the tenant database."""
+    sql = """
+        CREATE TABLE IF NOT EXISTS location_master (
+            id                  SERIAL PRIMARY KEY,
+            entity_id           VARCHAR(100),
+            gstin               VARCHAR(20) NOT NULL UNIQUE,
+            legal_name          VARCHAR(500),
+            trade_name          VARCHAR(500),
+            registration_type   VARCHAR(50),
+            pan                 VARCHAR(20),
+            email               VARCHAR(200),
+            mobile              VARCHAR(50),
+            address1            VARCHAR(500),
+            address2            VARCHAR(500),
+            city                VARCHAR(100),
+            state_code          INTEGER,
+            pincode             INTEGER,
+            is_active           VARCHAR(5),
+            entity_code         VARCHAR(100),
+            raw_data            JSONB,
+            source_file         VARCHAR(500),
+            stamp               TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            modified_stamp      TIMESTAMP WITH TIME ZONE
+        );
+        CREATE INDEX IF NOT EXISTS idx_location_master_gstin      ON location_master(gstin);
+        CREATE INDEX IF NOT EXISTS idx_location_master_state_code ON location_master(state_code);
+        CREATE INDEX IF NOT EXISTS idx_location_master_stamp      ON location_master(stamp);
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql)
+        conn.commit()
+        logger.info("Ensured location_master table exists")
+
+
+def upsert_location_master_records(conn, records: List[Dict[str, Any]],
+                                    source_file: str) -> Tuple[int, int]:
+    if not records:
+        return 0, 0
+
+    columns = [
+        'entity_id', 'gstin', 'legal_name', 'trade_name', 'registration_type',
+        'pan', 'email', 'mobile', 'address1', 'address2', 'city', 'state_code',
+        'pincode', 'is_active', 'entity_code', 'raw_data', 'source_file',
+    ]
+    update_cols = [c for c in columns if c != 'gstin']
+    update_clause = ', '.join(f"{c} = EXCLUDED.{c}" for c in update_cols)
+    update_clause += ", modified_stamp = CURRENT_TIMESTAMP"
+
+    sql = f"""
+        INSERT INTO location_master ({', '.join(columns)})
+        VALUES ({', '.join(['%s'] * len(columns))})
+        ON CONFLICT (gstin)
+        DO UPDATE SET {update_clause}
+        RETURNING (xmax = 0) AS is_insert
+    """
+
+    inserted_count = updated_count = 0
+    with conn.cursor() as cur:
+        for record in records:
+            row = {
+                'entity_id':          record.get('entityId') or record.get('id'),
+                'gstin':              record.get('gstin') or record.get('locationGstin'),
+                'legal_name':         record.get('legalName'),
+                'trade_name':         record.get('tradeName'),
+                'registration_type':  record.get('registrationType') or record.get('taxpayerType'),
+                'pan':                record.get('pan'),
+                'email':              record.get('email'),
+                'mobile':             record.get('mobile'),
+                'address1':           record.get('address1'),
+                'address2':           record.get('address2'),
+                'city':               record.get('city'),
+                'state_code':         record.get('stateCode'),
+                'pincode':            record.get('pincode'),
+                'is_active':          str(record.get('isActive', True)),
+                'entity_code':        record.get('entityCode') or record.get('locationCode'),
+                'raw_data':           json.dumps(record),
+                'source_file':        source_file,
+            }
+            if not row.get('gstin'):
+                logger.warning("Skipping location_master record with no GSTIN")
+                continue
+            values = [row.get(c) for c in columns]
+            try:
+                cur.execute(sql, values)
+                result = cur.fetchone()
+                if result and result[0]:
+                    inserted_count += 1
+                else:
+                    updated_count += 1
+            except Exception as e:
+                logger.error(f"Error upserting location_master record {row.get('gstin')}: {e}")
+                raise
+        conn.commit()
+
+    return inserted_count, updated_count
+
+
+# =============================================================================
+# User Master table
+# =============================================================================
+
+def ensure_user_master_table_exists(conn) -> None:
+    """Create the user_master table in the tenant database."""
+    sql = """
+        CREATE TABLE IF NOT EXISTS user_master (
+            id              SERIAL PRIMARY KEY,
+            user_id         VARCHAR(100) UNIQUE,
+            username        VARCHAR(200),
+            email           VARCHAR(200),
+            first_name      VARCHAR(200),
+            last_name       VARCHAR(200),
+            mobile          VARCHAR(50),
+            role            VARCHAR(100),
+            status          VARCHAR(50),
+            entity_access   JSONB,
+            raw_data        JSONB,
+            source_file     VARCHAR(500),
+            stamp           TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            modified_stamp  TIMESTAMP WITH TIME ZONE
+        );
+        CREATE INDEX IF NOT EXISTS idx_user_master_user_id ON user_master(user_id);
+        CREATE INDEX IF NOT EXISTS idx_user_master_email   ON user_master(email);
+        CREATE INDEX IF NOT EXISTS idx_user_master_role    ON user_master(role);
+        CREATE INDEX IF NOT EXISTS idx_user_master_stamp   ON user_master(stamp);
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql)
+        conn.commit()
+        logger.info("Ensured user_master table exists")
+
+
+def upsert_user_master_records(conn, records: List[Dict[str, Any]],
+                                source_file: str) -> Tuple[int, int]:
+    if not records:
+        return 0, 0
+
+    columns = [
+        'user_id', 'username', 'email', 'first_name', 'last_name',
+        'mobile', 'role', 'status', 'entity_access', 'raw_data', 'source_file',
+    ]
+    update_cols = [c for c in columns if c != 'user_id']
+    update_clause = ', '.join(f"{c} = EXCLUDED.{c}" for c in update_cols)
+    update_clause += ", modified_stamp = CURRENT_TIMESTAMP"
+
+    sql = f"""
+        INSERT INTO user_master ({', '.join(columns)})
+        VALUES ({', '.join(['%s'] * len(columns))})
+        ON CONFLICT (user_id)
+        DO UPDATE SET {update_clause}
+        RETURNING (xmax = 0) AS is_insert
+    """
+
+    inserted_count = updated_count = 0
+    with conn.cursor() as cur:
+        for record in records:
+            user_id = record.get('userId') or record.get('id') or record.get('username')
+            if not user_id:
+                logger.warning("Skipping user_master record with no user_id")
+                continue
+            row = {
+                'user_id':       str(user_id),
+                'username':      record.get('username'),
+                'email':         record.get('email'),
+                'first_name':    record.get('firstName'),
+                'last_name':     record.get('lastName'),
+                'mobile':        record.get('mobile'),
+                'role':          record.get('role'),
+                'status':        record.get('status'),
+                'entity_access': json.dumps(record.get('entityAccess') or record.get('entities') or []),
+                'raw_data':      json.dumps(record),
+                'source_file':   source_file,
+            }
+            values = [row.get(c) for c in columns]
+            try:
+                cur.execute(sql, values)
+                result = cur.fetchone()
+                if result and result[0]:
+                    inserted_count += 1
+                else:
+                    updated_count += 1
+            except Exception as e:
+                logger.error(f"Error upserting user_master record {user_id}: {e}")
+                raise
+        conn.commit()
+
+    return inserted_count, updated_count
+
+
+# =============================================================================
+# Module routing — single entry point for ensure + upsert
+# =============================================================================
+
+def ensure_module_table_exists(conn, module: str) -> None:
+    """Create the correct tenant table for the given module name."""
+    routing = {
+        'sale':                  ensure_sales_table_exists,
+        'purchase':              ensure_purchase_table_exists,
+        'einvoice':              ensure_einvoice_table_exists,
+        'ewaybill':              ensure_ewaybill_table_exists,
+        'creditnote':            ensure_creditnote_table_exists,
+        'debitnote':             ensure_debitnote_table_exists,
+        'einv_generated':        ensure_einv_generated_table_exists,
+        'sales_auto_draft':      ensure_sales_auto_draft_table_exists,
+        '2b':                    ensure_gstr2b_table_exists,
+        'recon_sales_autodraft': ensure_recon_3way_table_exists,
+        'recon_sales_einv':      ensure_recon_3way_table_exists,
+        'recon_2b_pr':           ensure_recon_2b_pr_table_exists,
+        'location_master':       ensure_location_master_table_exists,
+        'user_master':           ensure_user_master_table_exists,
+    }
+    fn = routing.get(module)
+    if fn:
+        fn(conn)
+    else:
+        logger.warning(f"Unknown module '{module}' — no table created")
+
+
+def upsert_module_records(conn, module: str, records: List[Dict[str, Any]],
+                           source_file: str) -> Tuple[int, int]:
+    """Route records to the correct upsert function based on module name."""
+    routing = {
+        'sale':                  lambda: upsert_sales_records(conn, records, source_file),
+        'purchase':              lambda: upsert_purchase_records(conn, records, source_file),
+        'einvoice':              lambda: upsert_einvoice_records(conn, records, source_file),
+        'ewaybill':              lambda: upsert_ewaybill_records(conn, records, source_file),
+        'creditnote':            lambda: upsert_creditnote_records(conn, records, source_file),
+        'debitnote':             lambda: upsert_debitnote_records(conn, records, source_file),
+        'einv_generated':        lambda: upsert_einv_generated_records(conn, records, source_file),
+        'sales_auto_draft':      lambda: upsert_sales_auto_draft_records(conn, records, source_file),
+        '2b':                    lambda: upsert_gstr2b_records(conn, records, source_file),
+        'recon_sales_autodraft': lambda: upsert_recon_3way_records(conn, records, source_file, recon_type=module),
+        'recon_sales_einv':      lambda: upsert_recon_3way_records(conn, records, source_file, recon_type=module),
+        'recon_2b_pr':           lambda: upsert_recon_2b_pr_records(conn, records, source_file),
+        'location_master':       lambda: upsert_location_master_records(conn, records, source_file),
+        'user_master':           lambda: upsert_user_master_records(conn, records, source_file),
+    }
+    fn = routing.get(module)
+    if fn:
+        return fn()
+    else:
+        logger.warning(f"Unknown module '{module}' — no records inserted")
+        return 0, 0
