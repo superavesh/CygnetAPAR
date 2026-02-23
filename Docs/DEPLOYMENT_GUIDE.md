@@ -371,8 +371,8 @@ For issues, check:
 
 ```
 ┌─────────────────┐
-│  EventBridge    │
-│   Schedule      │
+│  NextJs app for │
+│     schedular   │
 └────────┬────────┘
          │
          ▼
