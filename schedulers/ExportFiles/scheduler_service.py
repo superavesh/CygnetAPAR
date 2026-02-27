@@ -18,7 +18,7 @@ from db_connection import (
     ensure_transaction_logs_table,
     log_api_transaction
 )
-from api_client import ExportApiClient, save_export_data, MODULE_ENDPOINTS, ApiTransactionInfo
+from api_client import ExportApiClient, save_export_data, MODULE_ENDPOINTS, ApiTransactionInfo, ApiError
 
 # Configure logging
 logging.basicConfig(
@@ -279,6 +279,16 @@ class ExportScheduler:
                             gstin, from_stamp, to_stamp, file_path
                         )
 
+                    except ApiError as e:
+                        error_msg = f"Error fetching {module} data for GSTIN {gstin}: {str(e)}"
+                        logger.error(error_msg)
+                        result['errors'].append(error_msg)
+                        # Log the failed API transaction so it appears in the API Logs UI
+                        if e.transactions:
+                            self._log_transactions(
+                                e.transactions, db_name, db_host, db_port, db_user, db_password,
+                                gstin, from_stamp, to_stamp, file_path=None
+                            )
                     except Exception as e:
                         error_msg = f"Error fetching {module} data for GSTIN {gstin}: {str(e)}"
                         logger.error(error_msg)

@@ -16,6 +16,7 @@ import {
   Clock,
   Filter,
   X,
+  Eye,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Modal from '@/components/Modal';
@@ -65,6 +66,7 @@ export default function TransactionLogsPage() {
   const [selectedLog, setSelectedLog] = useState<TransactionLog | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [expandedLogIds, setExpandedLogIds] = useState<Set<number>>(new Set());
+  const [showGstinSuggestions, setShowGstinSuggestions] = useState(false);
 
   // Filter state
   const [selectedSubscriberId, setSelectedSubscriberId] = useState(initialSubscriberId);
@@ -304,18 +306,66 @@ export default function TransactionLogsPage() {
                 </select>
               </div>
 
-              <div style={{ minWidth: '180px' }}>
+              <div style={{ minWidth: '180px', position: 'relative' }}>
                 <label className="form-label">GSTIN</label>
-                <select
-                  className="form-select"
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Type to search GSTIN..."
                   value={gstinFilter}
-                  onChange={(e) => setGstinFilter(e.target.value)}
-                >
-                  <option value="">All GSTINs</option>
-                  {availableGstins.map((g) => (
-                    <option key={g} value={g}>{g}</option>
-                  ))}
-                </select>
+                  onChange={(e) => {
+                    setGstinFilter(e.target.value.toUpperCase());
+                    setShowGstinSuggestions(true);
+                  }}
+                  onFocus={() => setShowGstinSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowGstinSuggestions(false), 150)}
+                  maxLength={15}
+                  autoComplete="off"
+                />
+                {showGstinSuggestions && gstinFilter.length >= 2 && (() => {
+                  const matches = availableGstins.filter(g =>
+                    g.toUpperCase().includes(gstinFilter.toUpperCase())
+                  );
+                  return matches.length > 0 ? (
+                    <ul style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      zIndex: 100,
+                      margin: 0,
+                      padding: 0,
+                      listStyle: 'none',
+                      border: '1px solid var(--border)',
+                      borderRadius: '0.375rem',
+                      backgroundColor: 'var(--surface)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+                      maxHeight: '200px',
+                      overflowY: 'auto',
+                    }}>
+                      {matches.map(g => (
+                        <li
+                          key={g}
+                          onMouseDown={() => {
+                            setGstinFilter(g);
+                            setShowGstinSuggestions(false);
+                          }}
+                          style={{
+                            padding: '0.5rem 0.75rem',
+                            cursor: 'pointer',
+                            fontSize: '0.8rem',
+                            fontFamily: 'monospace',
+                            borderBottom: '1px solid var(--border)',
+                          }}
+                          onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--background)')}
+                          onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                        >
+                          {g}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null;
+                })()}
               </div>
 
               <div style={{ minWidth: '120px' }}>
@@ -508,7 +558,7 @@ export default function TransactionLogsPage() {
                             onClick={() => openDetailModal(log)}
                             title="View Details"
                           >
-                            <ChevronDown size={14} />
+                            <Eye size={14} />
                           </button>
                         </td>
                       </tr>

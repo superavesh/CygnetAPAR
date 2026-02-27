@@ -15,17 +15,25 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+class ApiError(Exception):
+    """Raised when an API call fails. Carries the transaction_info list so the
+    caller can still log the failed request to the database."""
+    def __init__(self, message: str, transactions: List['ApiTransactionInfo'] = None):
+        super().__init__(message)
+        self.transactions: List['ApiTransactionInfo'] = transactions or []
+
+
 # Module configuration - defines API endpoints for different modules
 MODULE_ENDPOINTS = {
     # Transaction modules
     'sale': '/enriched/v0.1/oregular/sale/export',
     'purchase': '/enriched/v0.1/oregular/purchase/export',
-    'einvoice': '/enriched/v0.1/oregular/einvoice/export',
+    'einvoice': '/enriched/v0.1/eInvoice/export',
     'ewaybill': '/enriched/v0.1/oregular/ewaybill/export',
     'creditnote': '/enriched/v0.1/oregular/creditnote/export',
     'debitnote': '/enriched/v0.1/oregular/debitnote/export',
     # GSTR modules
-    '2b': '/enriched/v0.1/oregular/gstr2b/export',
+    '2b': '/enriched/v0.1/oregular/gstr2aReconciliation/export',
     'einv_generated': '/enriched/v0.1/oregular/einv-generated/export',
     'sales_auto_draft': '/enriched/v0.1/oregular/sales-auto-draft/export',
     # Reconciliation modules
@@ -92,21 +100,41 @@ class ExportApiClient:
 
         return int(f"{fy_start}{str(fy_end)[-2:]}")
 
-    def fetch_module_export(self, module: str, gstin: str, from_stamp: datetime, to_stamp: datetime,
-                             start: int = 0, size: int = 1000) -> Tuple[Dict[str, Any], ApiTransactionInfo]:
+    def _next_financial_year(self, fy: int) -> int:
         """
-        Fetch export data from the API for any module
+        Advance to the next financial year.
+        e.g. 201617 → 201718,  202526 → 202627
+        """
+        fy_start = fy // 100          # e.g. 2016 from 201617
+        next_start = fy_start + 1
+        next_end = (next_start + 1) % 100   # e.g. 18 from 2018
+        return next_start * 100 + next_end
 
-        Args:
-            module: Module name (sale, purchase, einvoice, etc.)
-            gstin: GSTIN of the location
-            from_stamp: Start datetime for data fetch
-            to_stamp: End datetime for data fetch
-            start: Pagination start index
-            size: Number of records to fetch
+    def _is_fy_invalid_error(self, response) -> bool:
+        """Return True if the 422 response body contains a VAL0012 financial-year error."""
+        try:
+            body = response.json()
+            errors = body if isinstance(body, list) else []
+            return any(
+                any(err.get('code') == 'VAL0012' for err in prop.get('errors', []))
+                for prop in errors
+            )
+        except Exception:
+            return False
+
+    def fetch_module_export(self, module: str, gstin: str, from_stamp: datetime, to_stamp: datetime,
+                             start: int = 0, size: int = 1000) -> Tuple[Dict[str, Any], List[ApiTransactionInfo]]:
+        """
+        Fetch export data from the API for any module.
+
+        When the API returns a 422 VAL0012 (FinancialYear invalid) the method
+        automatically advances the financial year by one and retries, repeating
+        until a valid financial year is found or the current FY is exceeded.
+        Every attempt — successful or failed — is recorded in the returned list
+        so callers can log them all to the database.
 
         Returns:
-            Tuple of (API response as dictionary, ApiTransactionInfo for logging)
+            Tuple of (API response dict, list of ApiTransactionInfo for every attempt)
         """
         endpoint = MODULE_ENDPOINTS.get(module)
         if not endpoint:
@@ -114,79 +142,105 @@ class ExportApiClient:
 
         url = f"{self.base_url}{endpoint}"
 
-        # Format dates for API
         from_stamp_str = from_stamp.strftime(scheduler_config.api_date_format)
-        to_stamp_str = to_stamp.strftime(scheduler_config.api_date_format)
+        to_stamp_str   = to_stamp.strftime(scheduler_config.api_date_format)
+        headers_for_log = dict(self.headers)
 
-        # Calculate financial year from the from_stamp
         financial_year = self._get_financial_year(from_stamp)
+        current_fy     = self._get_financial_year(datetime.now())
 
-        payload = {
-            "locations": [
-                {"locationGstin": gstin}
-            ],
-            "start": start,
-            "size": size,
-            "financialYear": financial_year,
-            "fromStamp": from_stamp_str,
-            "toStamp": to_stamp_str
-        }
+        all_attempts: List[ApiTransactionInfo] = []
 
-        # Prepare headers for logging (mask auth token for security)
-        headers_for_log = {k: ('***' if k == 'auth-token' else v) for k, v in self.headers.items()}
+        while financial_year <= current_fy:
+            payload = {
+                "locations": [{"locationGstin": gstin}],
+                "start": start,
+                "size": size,
+                "financialYear": financial_year,
+                "fromStamp": from_stamp_str,
+                "toStamp": to_stamp_str,
+            }
 
-        logger.info(f"Fetching {module} export: GSTIN={gstin}, from={from_stamp_str}, to={to_stamp_str}, FY={financial_year}")
-
-        start_time = time.time()
-        transaction_info = None
-
-        try:
-            response = requests.post(url, headers=self.headers, json=payload, timeout=120)
-            execution_time_ms = int((time.time() - start_time) * 1000)
-
-            # Create transaction info for logging
-            transaction_info = ApiTransactionInfo(
-                module=module,
-                request_url=url,
-                request_method='POST',
-                request_headers=headers_for_log,
-                request_body=payload,
-                response_status_code=response.status_code,
-                response_headers=dict(response.headers),
-                execution_time_ms=execution_time_ms,
-                is_success=response.ok,
-                error_message=None if response.ok else response.text[:500]
+            logger.info(
+                f"Fetching {module} export: GSTIN={gstin}, "
+                f"from={from_stamp_str}, to={to_stamp_str}, FY={financial_year}"
             )
 
-            response.raise_for_status()
-            data = response.json()
-            logger.info(f"API Response: {len(data.get('result', []))} records fetched")
-            return data, transaction_info
+            request_start = time.time()
+            transaction_info = None
 
-        except requests.exceptions.RequestException as e:
-            execution_time_ms = int((time.time() - start_time) * 1000)
-            error_msg = str(e)
+            try:
+                response = requests.post(url, headers=self.headers, json=payload, timeout=120)
+                execution_time_ms = int((time.time() - request_start) * 1000)
 
-            # Create transaction info even for failed requests
-            if transaction_info is None:
                 transaction_info = ApiTransactionInfo(
                     module=module,
                     request_url=url,
                     request_method='POST',
                     request_headers=headers_for_log,
                     request_body=payload,
-                    response_status_code=getattr(e.response, 'status_code', 0) if hasattr(e, 'response') else 0,
-                    response_headers=dict(getattr(e.response, 'headers', {})) if hasattr(e, 'response') and e.response else {},
+                    response_status_code=response.status_code,
+                    response_headers=dict(response.headers),
                     execution_time_ms=execution_time_ms,
-                    is_success=False,
-                    error_message=error_msg[:500]
+                    is_success=response.ok,
+                    error_message=None if response.ok else response.text[:500],
                 )
 
-            logger.error(f"API request failed: {e}")
-            raise
+                # 422 + VAL0012 → financial year is not valid for this module/GSTIN.
+                # Advance to the next FY and retry with the same fromStamp/toStamp.
+                if response.status_code == 422 and self._is_fy_invalid_error(response):
+                    all_attempts.append(transaction_info)
+                    next_fy = self._next_financial_year(financial_year)
+                    logger.info(
+                        f"FY {financial_year} invalid for {module}/{gstin} "
+                        f"(VAL0012) — retrying with FY {next_fy}"
+                    )
+                    financial_year = next_fy
+                    continue  # retry with next financial year
+
+                response.raise_for_status()
+                data = response.json()
+                logger.info(f"API Response: {len(data.get('result', []))} records fetched")
+                all_attempts.append(transaction_info)
+                return data, all_attempts
+
+            except ApiError:
+                raise  # already wrapped, let it propagate
+
+            except requests.exceptions.RequestException as e:
+                execution_time_ms = int((time.time() - request_start) * 1000)
+                error_msg = str(e)
+
+                if transaction_info is None:
+                    transaction_info = ApiTransactionInfo(
+                        module=module,
+                        request_url=url,
+                        request_method='POST',
+                        request_headers=headers_for_log,
+                        request_body=payload,
+                        response_status_code=getattr(e.response, 'status_code', 0) if hasattr(e, 'response') else 0,
+                        response_headers=dict(getattr(e.response, 'headers', {})) if hasattr(e, 'response') and e.response else {},
+                        execution_time_ms=execution_time_ms,
+                        is_success=False,
+                        error_message=error_msg[:500],
+                    )
+
+                all_attempts.append(transaction_info)
+                logger.error(f"API request failed: {e}")
+                raise ApiError(error_msg, transactions=all_attempts) from e
+
+        # All financial years up to current_fy returned VAL0012 — nothing to fetch
+        logger.warning(
+            f"All financial years ({self._get_financial_year(from_stamp)}–{current_fy}) "
+            f"returned VAL0012 for {module}/{gstin}. No data available."
+        )
+        raise ApiError(
+            f"No valid financial year found for {module}/{gstin}",
+            transactions=all_attempts,
+        )
 
     def fetch_sale_export(self, gstin: str, from_stamp: datetime, to_stamp: datetime,
-                          start: int = 0, size: int = 1000) -> Tuple[Dict[str, Any], ApiTransactionInfo]:
+                          start: int = 0, size: int = 1000) -> Tuple[Dict[str, Any], List[ApiTransactionInfo]]:
         """
         Fetch sale export data from the API (backward compatible method)
 
@@ -234,8 +288,15 @@ class ExportApiClient:
 
         while True:
             logger.info(f"Fetching {module} records: start={start}, size={size}")
-            response, transaction_info = self.fetch_module_export(module, gstin, from_stamp, to_stamp, start, size)
-            all_transactions.append(transaction_info)
+            try:
+                response, page_transactions = self.fetch_module_export(module, gstin, from_stamp, to_stamp, start, size)
+            except ApiError as e:
+                # Collect all attempt transactions (including FY retries) then re-raise
+                # so the caller can log every attempt to the database
+                all_transactions.extend(e.transactions)
+                raise ApiError(str(e), transactions=all_transactions) from e.__cause__
+
+            all_transactions.extend(page_transactions)
 
             records = response.get('result', [])
             total_records = response.get('totalRecords', 0)
