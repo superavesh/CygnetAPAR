@@ -34,7 +34,7 @@ MODULE_ENDPOINTS = {
     'debitnote': '/enriched/v0.1/oregular/debitnote/export',
     # GSTR modules
     '2b': '/enriched/v0.1/oregular/gstr2aReconciliation/export',
-    'einv_generated': '/enriched/v0.1/oregular/einv-generated/export',
+    'einv_generated': '/enriched/v0.1/oregular/purchase/exportEInvoiceGeneratedAgainstMe',
     'sales_auto_draft': '/enriched/v0.1/oregular/sales-auto-draft/export',
     # Reconciliation modules
     'recon_sales_autodraft': '/enriched/v0.1/oregular/recon/sales-autodraft/export',
